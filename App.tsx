@@ -292,7 +292,7 @@ const App: React.FC = () => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
-                          className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4"
+                          className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight mb-4"
                         >
                           L3SR <span className="text-transparent bg-clip-text bg-gradient-to-r from-trading-gold to-yellow-200">Pro Systems</span>
                         </motion.h1>
@@ -300,7 +300,7 @@ const App: React.FC = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
-                          className="max-w-xl text-lg text-gray-400 leading-relaxed"
+                          className="max-w-xl text-base md:text-lg text-gray-400 leading-relaxed"
                         >
                           {lang === 'en' 
                             ? "Eliminate broker lag with the Atomic Timer. Validate every trade using the pre-flight checklist below."
@@ -312,7 +312,7 @@ const App: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate(PageState.GUIDE)}
-                            className="px-6 py-4 bg-trading-gold text-black font-bold rounded-xl hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(207,181,59,0.3)]"
+                            className="px-6 py-4 bg-trading-gold text-black font-bold rounded-xl hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(207,181,59,0.3)] w-full sm:w-auto"
                           >
                             <BookOpen size={20} />
                             {lang === 'en' ? 'Master The Strategy' : 'Strategy Seekhein'}
@@ -321,7 +321,7 @@ const App: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate(PageState.SIMULATOR)}
-                            className="px-6 py-4 bg-[#1a1a1a] text-white font-bold rounded-xl hover:bg-[#252525] border border-gray-800 transition-all flex items-center justify-center gap-2"
+                            className="px-6 py-4 bg-[#1a1a1a] text-white font-bold rounded-xl hover:bg-[#252525] border border-gray-800 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
                           >
                             <Gamepad2 size={20} />
                             {lang === 'en' ? 'Practice Simulator' : 'Practice Simulator'}
@@ -335,13 +335,13 @@ const App: React.FC = () => {
                            <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
                              <Globe size={14} /> {lang === 'en' ? 'Active Session' : 'Active Session'}
                            </div>
-                           <div className="text-xl text-white font-bold">{session}</div>
+                           <div className="text-lg md:text-xl text-white font-bold">{session}</div>
                         </motion.div>
                         <motion.div whileHover={{ y: -5 }} className="bg-trading-card p-4 rounded-xl border border-gray-800 flex flex-col gap-2">
                            <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
                              <Signal size={14} /> {lang === 'en' ? 'Market Volatility' : 'Market Volatility'}
                            </div>
-                           <div className={`text-xl font-bold ${volatility === 'HIGH' ? 'text-green-500' : 'text-orange-500'}`}>
+                           <div className={`text-lg md:text-xl font-bold ${volatility === 'HIGH' ? 'text-green-500' : 'text-orange-500'}`}>
                              {volatility}
                            </div>
                         </motion.div>

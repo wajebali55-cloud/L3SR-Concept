@@ -42,7 +42,7 @@ const DRILL_SCENARIOS = [
   {
     id: 4,
     level: 'SUPPORT',
-    last3s: 'PUSH_DOWN',
+    last3s: 'PUSH_DOWN', 
     correct: 'BUY',
     hint: "Sellers are panic dumping into support.",
     hintUR: "Sellers ghabra kar support par dump kar rahay hain.",
@@ -400,7 +400,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
          </div>
       </div>
 
-      <div className="relative w-full max-w-[450px] aspect-square bg-[#0f1115] rounded-3xl border-4 border-gray-800 shadow-2xl overflow-hidden flex flex-col mx-auto">
+      <div className="relative w-full max-w-[450px] aspect-square md:aspect-square h-[320px] md:h-auto bg-[#0f1115] rounded-3xl border-4 border-gray-800 shadow-2xl overflow-hidden flex flex-col mx-auto">
          
          <div className={`h-12 w-full flex items-center justify-center border-b border-white/5 transition-colors duration-300 ${currentScenario.level === 'RESISTANCE' ? 'bg-red-900/20 border-red-500/30' : ''}`}>
              {currentScenario.level === 'RESISTANCE' && <span className="text-[10px] font-bold text-red-500 bg-black/50 px-2 py-1 rounded">RESISTANCE</span>}

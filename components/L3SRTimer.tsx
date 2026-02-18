@@ -354,7 +354,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
            </div>
         </div>
 
-        <div className="relative mb-2 min-h-[160px] flex items-center justify-center">
+        <div className="relative mb-2 min-h-[120px] md:min-h-[160px] flex items-center justify-center">
             {!isActive ? (
                 <motion.button 
                     whileHover={{ scale: 1.05 }}
@@ -365,9 +365,9 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                     <motion.div 
                        animate={{ boxShadow: ['0 0 20px rgba(207,181,59,0.2)', '0 0 40px rgba(207,181,59,0.5)', '0 0 20px rgba(207,181,59,0.2)'] }}
                        transition={{ duration: 2, repeat: Infinity }}
-                       className="w-20 h-20 rounded-full border-2 border-trading-gold flex items-center justify-center group-hover:bg-trading-gold group-hover:text-black transition-all"
+                       className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-trading-gold flex items-center justify-center group-hover:bg-trading-gold group-hover:text-black transition-all"
                     >
-                        <Zap size={32} />
+                        <Zap size={24} className="md:w-8 md:h-8" />
                     </motion.div>
                     <span className="text-sm font-bold text-trading-gold uppercase tracking-widest">Activate Timer</span>
                 </motion.button>
@@ -378,13 +378,13 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                         initial={{ y: 5, opacity: 0.5 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 800, damping: 30 }}
-                        className={`text-8xl md:text-9xl font-mono font-bold leading-none tracking-tighter tabular-nums transition-colors duration-100 ${
+                        className={`text-7xl sm:text-8xl md:text-9xl font-mono font-bold leading-none tracking-tighter tabular-nums transition-colors duration-100 ${
                         isDangerZone ? 'text-red-500' : 
                         isPreAlert ? 'text-yellow-400' : 'text-white'
                     }`}>
                         {secondsLeft === 60 ? '00' : secondsLeft.toString().padStart(2, '0')}
                     </motion.span>
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-[0.5em] mt-2">
+                    <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-[0.5em] mt-2">
                         Seconds Left
                     </span>
                 </div>
@@ -397,7 +397,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
               isPreAlert ? { scale: 1.05, backgroundColor: "rgba(234, 179, 8, 0.2)", color: "#facc15", borderColor: "#facc15" } :
               {}
             }
-            className={`mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
+            className={`mt-4 md:mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
              isActive 
                 ? 'bg-black/40 text-gray-500 border-gray-800'
                 : 'bg-black/20 text-gray-700 border-gray-800 opacity-50'
