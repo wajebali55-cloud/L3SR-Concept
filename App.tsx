@@ -6,7 +6,8 @@ import AccessGate from './components/AccessGate';
 import L3SRTimer from './components/L3SRTimer';
 import TradeJournal from './components/TradeJournal';
 import PreFlightChecklist from './components/PreFlightChecklist';
-import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle } from 'lucide-react';
+import AccuracyGuide from './components/AccuracyGuide';
+import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -131,6 +132,7 @@ const App: React.FC = () => {
               {[
                 { label: 'Dashboard', value: PageState.HOME, icon: null },
                 { label: 'Strategy Guide', value: PageState.GUIDE, icon: null },
+                { label: 'Accuracy Protocol', value: PageState.ACCURACY, icon: null },
                 { label: 'Simulator', value: PageState.SIMULATOR, icon: null },
               ].map((item) => (
                 <motion.button 
@@ -196,8 +198,9 @@ const App: React.FC = () => {
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <button onClick={() => navigate(PageState.HOME)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Dashboard</button>
                 <button onClick={() => navigate(PageState.GUIDE)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">Strategy Guide</button>
+                <button onClick={() => navigate(PageState.ACCURACY)} className="block px-3 py-3 rounded-md text-base font-medium text-trading-gold w-full text-left border-b border-gray-800/50">Accuracy Protocol</button>
                 <button onClick={() => navigate(PageState.SIMULATOR)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Simulator</button>
-                <button onClick={() => navigate(PageState.JOURNAL)} className="block px-3 py-3 rounded-md text-base font-medium text-trading-gold w-full text-left border-b border-gray-800/50">My Journal</button>
+                <button onClick={() => navigate(PageState.JOURNAL)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">My Journal</button>
                 <button onClick={handleLogout} className="block px-3 py-3 rounded-md text-base font-medium text-red-400 w-full text-left flex items-center gap-2"><LogOut size={16} /> Exit Session</button>
               </div>
             </motion.div>
@@ -370,6 +373,19 @@ const App: React.FC = () => {
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
             >
                <ConceptGuide />
+            </motion.div>
+          )}
+
+          {page === PageState.ACCURACY && (
+            <motion.div 
+              key="accuracy"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+            >
+               <AccuracyGuide />
             </motion.div>
           )}
 

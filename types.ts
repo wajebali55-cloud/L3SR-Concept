@@ -1,6 +1,7 @@
 export enum PageState {
   HOME = 'HOME',
   GUIDE = 'GUIDE',
+  ACCURACY = 'ACCURACY',
   SIMULATOR = 'SIMULATOR',
   JOURNAL = 'JOURNAL'
 }
