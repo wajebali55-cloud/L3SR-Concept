@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Zap, Maximize, Minimize, Expand } from 'lucide-react';
+import { Volume2, VolumeX, Zap, Maximize, Minimize, Expand, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface L3SRTimerProps {
@@ -7,98 +7,183 @@ interface L3SRTimerProps {
   onToggleMode?: () => void;
 }
 
+// 1. Silent Audio to keep browser Audio Engine active in background (Base64 WAV)
+const SILENCE_URL = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+
+// 2. Web Worker Script (Runs in background thread, unthrottled)
+const WORKER_SCRIPT = `
+let intervalId;
+self.onmessage = function(e) {
+  if (e.data === 'START') {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(() => {
+      self.postMessage('TICK');
+    }, 100); // Check every 100ms
+  } else if (e.data === 'STOP') {
+    if (intervalId) clearInterval(intervalId);
+  }
+};
+`;
+
 const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode }) => {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isActive, setIsActive] = useState(false);
   
-  // Audio Context Ref
+  // Refs
   const audioCtxRef = useRef<AudioContext | null>(null);
   const lastPlayedSecondRef = useRef<number | null>(null);
+  const isMutedRef = useRef(isMuted);
+  const workerRef = useRef<Worker | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Logic Ref (To access latest state inside Worker callback)
+  const tickLogicRef = useRef<() => void>(() => {});
 
-  // Initialize Audio & Start Timer
-  const initAudio = () => {
-    if (!audioCtxRef.current) {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      audioCtxRef.current = new AudioContext();
+  // Sync Mute State
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  // --- WORKER SETUP ---
+  useEffect(() => {
+    // Create Worker from Blob
+    const blob = new Blob([WORKER_SCRIPT], { type: 'application/javascript' });
+    workerRef.current = new Worker(URL.createObjectURL(blob));
+
+    // Listen for ticks
+    workerRef.current.onmessage = (e) => {
+      if (e.data === 'TICK') {
+        tickLogicRef.current(); // Call the latest logic
+      }
+    };
+
+    // Prepare Silent Audio
+    silentAudioRef.current = new Audio(SILENCE_URL);
+    silentAudioRef.current.loop = true;
+
+    return () => {
+      workerRef.current?.terminate();
+      silentAudioRef.current?.pause();
+    };
+  }, []);
+
+  // --- AUDIO ENGINE ---
+  const initAudio = async () => {
+    try {
+      // 1. Web Audio API Context
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtxRef.current = new AudioContext();
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        await audioCtxRef.current.resume();
+      }
+
+      // 2. Start Silent Loop (Keeps tab active on Mobile/Safari)
+      if (silentAudioRef.current) {
+        silentAudioRef.current.play().catch(() => {
+           // Auto-play policy might block this until user interaction, 
+           // but since this function is called on Click, it should work.
+           console.log("Silent audio start failed"); 
+        });
+      }
+
+      // 3. Play warm-up tone
+      playTone(0, 'sine', 0.01);
+      
+      setIsActive(true);
+    } catch (e) {
+      console.error("Audio init failed", e);
     }
-    if (audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume();
-    }
-    setIsActive(true);
   };
 
   const playTone = (freq: number, type: 'sine' | 'square' | 'sawtooth', duration: number) => {
-    if (isMuted || !audioCtxRef.current || !isActive) return;
+    if (isMutedRef.current || !audioCtxRef.current) return;
     
-    const osc = audioCtxRef.current.createOscillator();
-    const gain = audioCtxRef.current.createGain();
+    // Resume context if browser suspended it
+    if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+    }
 
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
-    
-    gain.gain.setValueAtTime(0.1, audioCtxRef.current.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtxRef.current.currentTime + duration);
+    try {
+      const osc = audioCtxRef.current.createOscillator();
+      const gain = audioCtxRef.current.createGain();
 
-    osc.connect(gain);
-    gain.connect(audioCtxRef.current.destination);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
+      
+      gain.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+      gain.gain.linearRampToValueAtTime(0.15, audioCtxRef.current.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtxRef.current.currentTime + duration);
 
-    osc.start();
-    osc.stop(audioCtxRef.current.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtxRef.current.destination);
+
+      osc.start();
+      osc.stop(audioCtxRef.current.currentTime + duration);
+    } catch (e) {
+      console.error("Play tone error", e);
+    }
   };
 
-  useEffect(() => {
-    let animationFrameId: number;
-
-    const tick = () => {
-      // CRITICAL UPDATE: If not active, do not calculate seconds, do not play sound.
-      if (!isActive) {
-        setSecondsLeft(0);
-        animationFrameId = requestAnimationFrame(tick); // Keep loop ready, but idle
-        return; 
-      }
-
+  // --- TIMER LOGIC (Called by Worker) ---
+  const handleTick = () => {
       const now = new Date();
       const currentSecond = now.getSeconds();
       
-      // Calculate remaining seconds in the current minute
       const remaining = 60 - currentSecond;
       const displaySec = remaining === 60 ? 0 : remaining;
       
-      // Update UI state
-      setSecondsLeft(displaySec);
+      setSecondsLeft(prev => prev !== displaySec ? displaySec : prev);
 
-      // --- L3SR AUDIO LOGIC ---
-      // Expanded to include 4s (Pre-Alert)
+      // Audio Triggers
       if (remaining <= 4 && remaining >= 1) {
           if (lastPlayedSecondRef.current !== remaining) {
               lastPlayedSecondRef.current = remaining;
               
-              if (remaining === 4) playTone(440, 'sine', 0.15); // 56s - Pre-Alert (Soft Warning)
-              if (remaining === 3) playTone(600, 'sine', 0.1); // 57s - Alert (L3SR Start)
-              if (remaining === 2) playTone(800, 'sine', 0.1); // 58s - Warning
-              if (remaining === 1) playTone(1200, 'square', 0.4); // 59s - EXECUTE
+              if (remaining === 4) playTone(660, 'sine', 0.15);   
+              if (remaining === 3) playTone(880, 'sine', 0.15);   
+              if (remaining === 2) playTone(880, 'sine', 0.15);   
+              if (remaining === 1) playTone(1760, 'square', 0.3); 
           }
       } else {
-          if (remaining > 4) {
+          if (remaining > 5) {
               lastPlayedSecondRef.current = null;
           }
       }
+      
+      // Safety: Ensure Context is running
+      if (audioCtxRef.current?.state === 'suspended') {
+          audioCtxRef.current.resume();
+      }
+  };
 
-      animationFrameId = requestAnimationFrame(tick);
-    };
+  // Keep ref updated
+  useEffect(() => {
+    tickLogicRef.current = handleTick;
+  }, []); // Logic doesn't depend on closure state other than refs/setters
 
-    tick();
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [isActive, isMuted]);
+  // Start/Stop Worker based on Active State
+  useEffect(() => {
+    if (isActive) {
+      workerRef.current?.postMessage('START');
+    } else {
+      workerRef.current?.postMessage('STOP');
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current.currentTime = 0;
+      }
+      setSecondsLeft(0);
+    }
+  }, [isActive]);
 
-  // Visual Helper States
-  // Only show danger zone effects if Active
-  // Visuals still focus on the "Last 3 Seconds" rule to avoid confusion
+
+  // --- RENDER HELPERS ---
   const isDangerZone = isActive && secondsLeft <= 3 && secondsLeft >= 1;
-  const isCritical = isActive && secondsLeft === 1; // The exact moment
+  const isCritical = isActive && secondsLeft === 1; 
+  const isPreAlert = isActive && secondsLeft === 4;
   
-  // Widget Mode Styles
   if (mode === 'widget') {
     return (
       <motion.div 
@@ -107,10 +192,10 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         exit={{ opacity: 0 }}
         className={`w-full h-screen flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-100 ${
         isCritical ? 'bg-red-600' : 
-        isDangerZone ? 'bg-[#2a0e0e]' : 'bg-black'
+        isDangerZone ? 'bg-[#2a0e0e]' : 
+        isPreAlert ? 'bg-[#1a1500]' : 'bg-black'
       }`}>
         
-        {/* Widget Background Pulse */}
         {isDangerZone && (
           <motion.div 
             animate={{ opacity: [0.1, 0.4, 0.1] }}
@@ -119,7 +204,6 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
           ></motion.div>
         )}
 
-        {/* Controls Overlay */}
         <div className="absolute top-4 right-4 z-50 flex gap-2">
            <motion.button 
              whileHover={{ scale: 1.1 }}
@@ -144,7 +228,6 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
            )}
         </div>
 
-        {/* Activation Overlay */}
         {!isActive && (
            <div className="absolute inset-0 z-40 bg-black flex items-center justify-center cursor-pointer" onClick={initAudio}>
               <div className="flex flex-col items-center gap-4 px-4 text-center">
@@ -160,19 +243,13 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
            </div>
         )}
 
-        {/* Main Display */}
         <div className={`relative z-10 flex flex-col items-center justify-center w-full h-full transition-opacity duration-500 ${!isActive ? 'opacity-0' : 'opacity-100'}`}>
-            {/* 
-                Use vmin for font-size. 
-                This ensures the text fits whether the window is tall (mobile) or wide (strip). 
-                40vmin means 40% of the *smallest* dimension.
-            */}
             <motion.span 
                key={secondsLeft}
                initial={{ scale: 1.1, opacity: 0.8 }}
                animate={{ scale: 1, opacity: 1 }}
                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-               className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-all duration-75 ${
+               className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-colors duration-75 ${
                 isCritical ? 'text-white' : 
                 isDangerZone ? 'text-red-500' : 'text-white'
             }`} style={{ fontSize: '45vmin', lineHeight: '1' }}>
@@ -210,7 +287,6 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
 
       <div className="p-6 flex flex-col items-center justify-center relative z-10">
         
-        {/* Header */}
         <div className="w-full flex justify-between items-start mb-4">
            <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
@@ -224,7 +300,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                whileHover={{ scale: 1.1 }}
                whileTap={{ scale: 0.9 }}
                onClick={() => setIsMuted(!isMuted)}
-               className="text-gray-500 hover:text-trading-gold transition-colors"
+               className={`transition-colors ${isMuted ? 'text-red-500' : 'text-gray-500 hover:text-trading-gold'}`}
                title={isMuted ? "Unmute" : "Mute"}
              >
                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -244,7 +320,6 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
            </div>
         </div>
 
-        {/* The Big Timer */}
         <div className="relative mb-2 min-h-[160px] flex items-center justify-center">
             {!isActive ? (
                 <motion.button 
@@ -265,7 +340,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
             ) : (
                 <div className="flex flex-col items-center">
                     <motion.span 
-                        key={secondsLeft} // Key prop triggers re-animation on change
+                        key={secondsLeft} 
                         initial={{ y: 5, opacity: 0.5 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 800, damping: 30 }}
@@ -281,7 +356,6 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
             )}
         </div>
 
-        {/* L3SR Label */}
         <motion.div 
             animate={isDangerZone ? { scale: 1.1, backgroundColor: "#ef4444", color: "#000000", borderColor: "#ef4444" } : {}}
             className={`mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
