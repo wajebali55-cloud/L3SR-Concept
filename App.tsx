@@ -9,8 +9,9 @@ import PreFlightChecklist from './components/PreFlightChecklist';
 import AccuracyGuide from './components/AccuracyGuide';
 import LegalDocs from './components/LegalDocs';
 import CookieConsent from './components/CookieConsent';
-import RiskSplash from './components/RiskSplash'; // Import the new Splash Screen
-import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale } from 'lucide-react';
+import RiskSplash from './components/RiskSplash';
+import QuotesGallery from './components/QuotesGallery'; // NEW IMPORT
+import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale, Feather } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -21,7 +22,6 @@ const App: React.FC = () => {
   const [isWidgetMode, setIsWidgetMode] = useState(false);
   
   // New State: Controls the initial Horror/Risk Splash Screen
-  // We default to TRUE unless we find a session, then we might skip it (optional, but let's keep it for drama)
   const [showRiskSplash, setShowRiskSplash] = useState(true);
 
   // Security: Check for valid session token on load
@@ -37,10 +37,6 @@ const App: React.FC = () => {
     // Validate the token format
     if (token && token.length > 5 && /^[0-9a-f]+$/i.test(token)) {
       setIsAuthenticated(true);
-      // Optional: If they are already logged in, maybe skip the splash? 
-      // For now, let's keep the splash because the user asked for it to be the "First screen"
-      // But for better UX, if authenticated, we could set showRiskSplash(false).
-      // Let's keep it true to satisfy "Open website -> Horror Screen".
     }
     setIsCheckingAuth(false);
 
@@ -179,8 +175,9 @@ const App: React.FC = () => {
               {[
                 { label: 'Dashboard', value: PageState.HOME, icon: null },
                 { label: 'Strategy Guide', value: PageState.GUIDE, icon: null },
-                { label: 'Accuracy Protocol', value: PageState.ACCURACY, icon: null },
+                { label: 'Accuracy', value: PageState.ACCURACY, icon: null },
                 { label: 'Simulator', value: PageState.SIMULATOR, icon: null },
+                { label: 'Wisdom', value: PageState.QUOTES, icon: null }, // NEW ITEM
               ].map((item) => (
                 <motion.button 
                   key={item.label}
@@ -247,6 +244,7 @@ const App: React.FC = () => {
                 <button onClick={() => navigate(PageState.GUIDE)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">Strategy Guide</button>
                 <button onClick={() => navigate(PageState.ACCURACY)} className="block px-3 py-3 rounded-md text-base font-medium text-trading-gold w-full text-left border-b border-gray-800/50">Accuracy Protocol</button>
                 <button onClick={() => navigate(PageState.SIMULATOR)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Simulator</button>
+                <button onClick={() => navigate(PageState.QUOTES)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Quotes & Wisdom</button>
                 <button onClick={() => navigate(PageState.JOURNAL)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">My Journal</button>
                 <div className="py-2"></div>
                 <button onClick={() => navigate(PageState.DISCLAIMER)} className="block px-3 py-2 rounded-md text-sm font-medium text-gray-400 w-full text-left">Disclaimer</button>
@@ -450,6 +448,20 @@ const App: React.FC = () => {
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center"
             >
               <ScenarioSimulator />
+            </motion.div>
+          )}
+          
+          {/* QUOTES PAGE RENDER */}
+          {page === PageState.QUOTES && (
+            <motion.div 
+              key="quotes"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+            >
+               <QuotesGallery />
             </motion.div>
           )}
 
