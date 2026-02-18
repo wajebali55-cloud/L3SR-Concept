@@ -113,8 +113,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
       osc.type = type;
       osc.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
       
-      gain.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
-      gain.gain.linearRampToValueAtTime(0.15, audioCtxRef.current.currentTime + 0.01);
+      gain.gain.setValueAtTime(0.1, audioCtxRef.current.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtxRef.current.currentTime + duration);
 
       osc.connect(gain);
@@ -142,10 +141,11 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
           if (lastPlayedSecondRef.current !== remaining) {
               lastPlayedSecondRef.current = remaining;
               
-              if (remaining === 4) playTone(660, 'sine', 0.15);   
-              if (remaining === 3) playTone(880, 'sine', 0.15);   
-              if (remaining === 2) playTone(880, 'sine', 0.15);   
-              if (remaining === 1) playTone(1760, 'square', 0.3); 
+              // REVERTED TO ORIGINAL SOUNDS
+              if (remaining === 4) playTone(440, 'sine', 0.15); // 56s - Pre-Alert
+              if (remaining === 3) playTone(600, 'sine', 0.1); // 57s - Alert (L3SR Start)
+              if (remaining === 2) playTone(800, 'sine', 0.1); // 58s - Warning
+              if (remaining === 1) playTone(1200, 'square', 0.4); // 59s - EXECUTE
           }
       } else {
           if (remaining > 5) {
@@ -193,7 +193,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         className={`w-full h-screen flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-100 ${
         isCritical ? 'bg-red-600' : 
         isDangerZone ? 'bg-[#2a0e0e]' : 
-        isPreAlert ? 'bg-[#1a1500]' : 'bg-black'
+        isPreAlert ? 'bg-yellow-900/40' : 'bg-black'
       }`}>
         
         {isDangerZone && (
@@ -201,6 +201,14 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
             animate={{ opacity: [0.1, 0.4, 0.1] }}
             transition={{ duration: 0.5, repeat: Infinity }}
             className="absolute inset-0 bg-red-500/20 pointer-events-none"
+          ></motion.div>
+        )}
+
+        {isPreAlert && (
+          <motion.div 
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+            className="absolute inset-0 bg-yellow-500/10 pointer-events-none"
           ></motion.div>
         )}
 
@@ -251,7 +259,8 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                transition={{ type: "spring", stiffness: 500, damping: 30 }}
                className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-colors duration-75 ${
                 isCritical ? 'text-white' : 
-                isDangerZone ? 'text-red-500' : 'text-white'
+                isDangerZone ? 'text-red-500' : 
+                isPreAlert ? 'text-yellow-400' : 'text-white'
             }`} style={{ fontSize: '45vmin', lineHeight: '1' }}>
                 {secondsLeft.toString().padStart(2, '0')}
             </motion.span>
@@ -260,9 +269,10 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
               animate={isDangerZone ? { scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] } : {}}
               transition={isDangerZone ? { duration: 0.5, repeat: Infinity } : {}}
               className={`mt-[2vmin] px-6 py-2 rounded-full font-bold uppercase tracking-[0.5em] transition-all ${
-                isDangerZone ? 'bg-red-500 text-black' : 'bg-white/10 text-gray-500'
+                isDangerZone ? 'bg-red-500 text-black' : 
+                isPreAlert ? 'bg-yellow-500/20 text-yellow-400' : 'bg-white/10 text-gray-500'
             }`} style={{ fontSize: '4vmin' }}>
-                {isDangerZone ? 'REJECT' : 'WAIT'}
+                {isDangerZone ? 'REJECT' : isPreAlert ? 'READY' : 'WAIT'}
             </motion.div>
         </div>
       </motion.div>
@@ -274,7 +284,11 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${isDangerZone ? 'bg-red-900/10 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.15)]' : 'bg-[#13151a] border-gray-800'}`}
+      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+        isDangerZone ? 'bg-red-900/10 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.15)]' : 
+        isPreAlert ? 'bg-yellow-900/10 border-yellow-500 shadow-[0_0_50px_rgba(234,179,8,0.15)]' :
+        'bg-[#13151a] border-gray-800'
+      }`}
     >
       
       {isDangerZone && (
@@ -282,6 +296,14 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
           animate={{ opacity: [0, 0.2, 0] }}
           transition={{ duration: 0.5, repeat: Infinity }}
           className="absolute inset-0 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none"
+        ></motion.div>
+      )}
+
+      {isPreAlert && (
+        <motion.div 
+          animate={{ opacity: [0, 0.2, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="absolute inset-0 bg-gradient-to-b from-yellow-500/10 to-transparent pointer-events-none"
         ></motion.div>
       )}
 
@@ -345,7 +367,8 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 800, damping: 30 }}
                         className={`text-8xl md:text-9xl font-mono font-bold leading-none tracking-tighter tabular-nums transition-colors duration-100 ${
-                        isDangerZone ? 'text-red-500' : 'text-white'
+                        isDangerZone ? 'text-red-500' : 
+                        isPreAlert ? 'text-yellow-400' : 'text-white'
                     }`}>
                         {secondsLeft === 60 ? '00' : secondsLeft.toString().padStart(2, '0')}
                     </motion.span>
@@ -357,13 +380,17 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         </div>
 
         <motion.div 
-            animate={isDangerZone ? { scale: 1.1, backgroundColor: "#ef4444", color: "#000000", borderColor: "#ef4444" } : {}}
+            animate={
+              isDangerZone ? { scale: 1.1, backgroundColor: "#ef4444", color: "#000000", borderColor: "#ef4444" } : 
+              isPreAlert ? { scale: 1.05, backgroundColor: "rgba(234, 179, 8, 0.2)", color: "#facc15", borderColor: "#facc15" } :
+              {}
+            }
             className={`mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
              isActive 
                 ? 'bg-black/40 text-gray-500 border-gray-800'
                 : 'bg-black/20 text-gray-700 border-gray-800 opacity-50'
         }`}>
-            {isDangerZone ? 'L3SR ALERT: WATCH!' : 'Wait for :57'}
+            {isDangerZone ? 'L3SR ALERT: WATCH!' : isPreAlert ? 'GET READY...' : 'Wait for :57'}
         </motion.div>
 
         <p className="text-[10px] text-gray-600 mt-4 text-center max-w-[200px]">
