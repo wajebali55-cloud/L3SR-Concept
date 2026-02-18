@@ -206,11 +206,11 @@ const App: React.FC = () => {
                       
                       <div className="mt-8 flex flex-col sm:flex-row gap-4">
                         <button 
-                          onClick={() => navigate(PageState.JOURNAL)}
+                          onClick={() => navigate(PageState.GUIDE)}
                           className="px-6 py-4 bg-trading-gold text-black font-bold rounded-xl hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(207,181,59,0.3)]"
                         >
-                          <BarChart2 size={20} />
-                          Open Trade Journal
+                          <BookOpen size={20} />
+                          Master The Strategy
                         </button>
                         <button 
                           onClick={() => navigate(PageState.SIMULATOR)}
