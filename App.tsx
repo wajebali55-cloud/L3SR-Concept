@@ -7,7 +7,9 @@ import L3SRTimer from './components/L3SRTimer';
 import TradeJournal from './components/TradeJournal';
 import PreFlightChecklist from './components/PreFlightChecklist';
 import AccuracyGuide from './components/AccuracyGuide';
-import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target } from 'lucide-react';
+import LegalDocs from './components/LegalDocs';
+import CookieConsent from './components/CookieConsent';
+import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -17,10 +19,15 @@ const App: React.FC = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isWidgetMode, setIsWidgetMode] = useState(false);
 
-  // Security: Check for valid session token
+  // Security: Check for valid session token on load
   useEffect(() => {
-    // We use a more obscure key name for security
-    const token = localStorage.getItem('__l3sr_secure_session_v1');
+    // 1. Check LocalStorage (Persistent)
+    let token = localStorage.getItem('__l3sr_secure_session_v1');
+    
+    // 2. If not found, Check SessionStorage (Temporary per tab)
+    if (!token) {
+      token = sessionStorage.getItem('__l3sr_secure_session_v1');
+    }
     
     // Validate the token format
     if (token && token.length > 5 && /^[0-9a-f]+$/i.test(token)) {
@@ -59,14 +66,35 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = (token: string) => {
-    localStorage.setItem('__l3sr_secure_session_v1', token);
+    // Check if user has consented to cookies/storage
+    const hasConsent = localStorage.getItem('l3sr_cookie_consent') === 'true';
+
+    if (hasConsent) {
+      // If consented, save to LocalStorage (Persists across browser restarts)
+      localStorage.setItem('__l3sr_secure_session_v1', token);
+    } else {
+      // If NOT consented, save to SessionStorage (Lost when tab/browser closes)
+      sessionStorage.setItem('__l3sr_secure_session_v1', token);
+    }
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    // Clear from both locations to be safe
     localStorage.removeItem('__l3sr_secure_session_v1');
+    sessionStorage.removeItem('__l3sr_secure_session_v1');
     setIsAuthenticated(false);
     setPage(PageState.HOME);
+  };
+
+  // Called when user clicks "Accept All" on the banner
+  const handleCookieAccept = () => {
+    // If the user is currently logged in via SessionStorage, move it to LocalStorage for persistence
+    const sessionToken = sessionStorage.getItem('__l3sr_secure_session_v1');
+    if (sessionToken) {
+      localStorage.setItem('__l3sr_secure_session_v1', sessionToken);
+      // We keep it in session too just in case, or we can remove it. Keeping it is fine.
+    }
   };
 
   const navigate = (p: PageState) => {
@@ -201,7 +229,11 @@ const App: React.FC = () => {
                 <button onClick={() => navigate(PageState.ACCURACY)} className="block px-3 py-3 rounded-md text-base font-medium text-trading-gold w-full text-left border-b border-gray-800/50">Accuracy Protocol</button>
                 <button onClick={() => navigate(PageState.SIMULATOR)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Simulator</button>
                 <button onClick={() => navigate(PageState.JOURNAL)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">My Journal</button>
-                <button onClick={handleLogout} className="block px-3 py-3 rounded-md text-base font-medium text-red-400 w-full text-left flex items-center gap-2"><LogOut size={16} /> Exit Session</button>
+                <div className="py-2"></div>
+                <button onClick={() => navigate(PageState.DISCLAIMER)} className="block px-3 py-2 rounded-md text-sm font-medium text-gray-400 w-full text-left">Disclaimer</button>
+                <button onClick={() => navigate(PageState.PRIVACY)} className="block px-3 py-2 rounded-md text-sm font-medium text-gray-400 w-full text-left">Privacy Policy</button>
+                <button onClick={() => navigate(PageState.TERMS)} className="block px-3 py-2 rounded-md text-sm font-medium text-gray-400 w-full text-left">Terms & Conditions</button>
+                <button onClick={handleLogout} className="block px-3 py-3 rounded-md text-base font-medium text-red-400 w-full text-left flex items-center gap-2 mt-2"><LogOut size={16} /> Exit Session</button>
               </div>
             </motion.div>
           )}
@@ -414,8 +446,37 @@ const App: React.FC = () => {
               <TradeJournal />
             </motion.div>
           )}
+
+          {/* LEGAL PAGES - Now Individual */}
+          {page === PageState.DISCLAIMER && (
+             <motion.div key="disclaimer" variants={pageVariants} initial="initial" animate="animate" exit="exit">
+               <LegalDocs type="DISCLAIMER" onBack={() => navigate(PageState.HOME)} />
+             </motion.div>
+          )}
+          {page === PageState.PRIVACY && (
+             <motion.div key="privacy" variants={pageVariants} initial="initial" animate="animate" exit="exit">
+               <LegalDocs type="PRIVACY" onBack={() => navigate(PageState.HOME)} />
+             </motion.div>
+          )}
+          {page === PageState.TERMS && (
+             <motion.div key="terms" variants={pageVariants} initial="initial" animate="animate" exit="exit">
+               <LegalDocs type="TERMS" onBack={() => navigate(PageState.HOME)} />
+             </motion.div>
+          )}
+          {page === PageState.IP && (
+             <motion.div key="ip" variants={pageVariants} initial="initial" animate="animate" exit="exit">
+               <LegalDocs type="IP" onBack={() => navigate(PageState.HOME)} />
+             </motion.div>
+          )}
+
         </AnimatePresence>
       </main>
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent 
+         onReadPolicy={() => navigate(PageState.PRIVACY)} 
+         onAccept={handleCookieAccept}
+      />
 
       {/* Footer */}
       <footer className="bg-trading-card border-t border-gray-800 py-8">
@@ -427,7 +488,22 @@ const App: React.FC = () => {
             </p>
             <p className="text-gray-500 text-xs mt-1">Authorized Personnel Only. Private Educational Suite.</p>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* New Legal Links - Linked to specific states */}
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+             <button onClick={() => navigate(PageState.DISCLAIMER)} className="text-gray-500 hover:text-white text-xs transition-colors flex items-center gap-1">
+                <Scale size={12} /> Legal Disclaimer
+             </button>
+             <button onClick={() => navigate(PageState.PRIVACY)} className="text-gray-500 hover:text-white text-xs transition-colors">
+                Privacy Policy
+             </button>
+             <button onClick={() => navigate(PageState.TERMS)} className="text-gray-500 hover:text-white text-xs transition-colors">
+                Terms of Use
+             </button>
+             <button onClick={() => navigate(PageState.IP)} className="text-gray-500 hover:text-white text-xs transition-colors">
+                IP Rights
+             </button>
+             <div className="h-4 w-px bg-gray-800 hidden md:block"></div>
              <span className="text-gray-600 text-xs">v3.0.0-PRO</span>
           </div>
         </div>

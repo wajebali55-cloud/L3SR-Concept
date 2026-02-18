@@ -3,7 +3,11 @@ export enum PageState {
   GUIDE = 'GUIDE',
   ACCURACY = 'ACCURACY',
   SIMULATOR = 'SIMULATOR',
-  JOURNAL = 'JOURNAL'
+  JOURNAL = 'JOURNAL',
+  DISCLAIMER = 'DISCLAIMER',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
+  IP = 'IP'
 }
 
 export type TrendType = 'UP' | 'DOWN' | 'RANGING';
