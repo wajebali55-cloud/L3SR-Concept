@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, Zap, Maximize, Minimize, Expand } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface L3SRTimerProps {
   mode?: 'default' | 'widget';
@@ -100,44 +101,60 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
   // Widget Mode Styles
   if (mode === 'widget') {
     return (
-      <div className={`w-full h-screen flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-100 ${
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`w-full h-screen flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-100 ${
         isCritical ? 'bg-red-600' : 
         isDangerZone ? 'bg-[#2a0e0e]' : 'bg-black'
       }`}>
         
         {/* Widget Background Pulse */}
         {isDangerZone && (
-          <div className="absolute inset-0 bg-red-500/20 animate-pulse pointer-events-none"></div>
+          <motion.div 
+            animate={{ opacity: [0.1, 0.4, 0.1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+            className="absolute inset-0 bg-red-500/20 pointer-events-none"
+          ></motion.div>
         )}
 
         {/* Controls Overlay */}
         <div className="absolute top-4 right-4 z-50 flex gap-2">
-           <button 
+           <motion.button 
+             whileHover={{ scale: 1.1 }}
+             whileTap={{ scale: 0.9 }}
              onClick={() => setIsMuted(!isMuted)}
              className="text-white/50 hover:text-white transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm"
              title={isMuted ? "Unmute" : "Mute"}
            >
              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-           </button>
+           </motion.button>
            
            {onToggleMode && (
-             <button 
+             <motion.button 
+               whileHover={{ scale: 1.1 }}
+               whileTap={{ scale: 0.9 }}
                onClick={onToggleMode}
                className="text-white/50 hover:text-white transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm"
                title="Exit Widget Mode"
              >
                <Minimize size={20} />
-             </button>
+             </motion.button>
            )}
         </div>
 
         {/* Activation Overlay */}
         {!isActive && (
            <div className="absolute inset-0 z-40 bg-black flex items-center justify-center cursor-pointer" onClick={initAudio}>
-              <div className="flex flex-col items-center gap-4 animate-pulse px-4 text-center">
-                 <div className="p-4 md:p-6 rounded-full border-4 border-trading-gold/50 shadow-[0_0_50px_rgba(207,181,59,0.3)]">
+              <div className="flex flex-col items-center gap-4 px-4 text-center">
+                 <motion.div 
+                   animate={{ scale: [1, 1.1, 1], borderColor: ['rgba(207,181,59,0.5)', 'rgba(207,181,59,1)', 'rgba(207,181,59,0.5)'] }}
+                   transition={{ duration: 2, repeat: Infinity }}
+                   className="p-4 md:p-6 rounded-full border-4 border-trading-gold/50 shadow-[0_0_50px_rgba(207,181,59,0.3)]"
+                 >
                     <Zap className="text-trading-gold" size={48} />
-                 </div>
+                 </motion.div>
                  <span className="text-trading-gold font-bold uppercase tracking-widest text-sm md:text-lg">Tap to Sync</span>
               </div>
            </div>
@@ -150,29 +167,45 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
                 This ensures the text fits whether the window is tall (mobile) or wide (strip). 
                 40vmin means 40% of the *smallest* dimension.
             */}
-            <span className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-all duration-75 ${
-                isCritical ? 'text-white scale-110' : 
+            <motion.span 
+               key={secondsLeft}
+               initial={{ scale: 1.1, opacity: 0.8 }}
+               animate={{ scale: 1, opacity: 1 }}
+               transition={{ type: "spring", stiffness: 500, damping: 30 }}
+               className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-all duration-75 ${
+                isCritical ? 'text-white' : 
                 isDangerZone ? 'text-red-500' : 'text-white'
             }`} style={{ fontSize: '45vmin', lineHeight: '1' }}>
                 {secondsLeft.toString().padStart(2, '0')}
-            </span>
+            </motion.span>
             
-            <div className={`mt-[2vmin] px-6 py-2 rounded-full font-bold uppercase tracking-[0.5em] transition-all ${
-                isDangerZone ? 'bg-red-500 text-black animate-pulse' : 'bg-white/10 text-gray-500'
+            <motion.div 
+              animate={isDangerZone ? { scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] } : {}}
+              transition={isDangerZone ? { duration: 0.5, repeat: Infinity } : {}}
+              className={`mt-[2vmin] px-6 py-2 rounded-full font-bold uppercase tracking-[0.5em] transition-all ${
+                isDangerZone ? 'bg-red-500 text-black' : 'bg-white/10 text-gray-500'
             }`} style={{ fontSize: '4vmin' }}>
                 {isDangerZone ? 'REJECT' : 'WAIT'}
-            </div>
+            </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   // DEFAULT DASHBOARD MODE
   return (
-    <div className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${isDangerZone ? 'bg-red-900/10 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.15)]' : 'bg-[#13151a] border-gray-800'}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${isDangerZone ? 'bg-red-900/10 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.15)]' : 'bg-[#13151a] border-gray-800'}`}
+    >
       
       {isDangerZone && (
-        <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent animate-pulse pointer-events-none"></div>
+        <motion.div 
+          animate={{ opacity: [0, 0.2, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="absolute inset-0 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none"
+        ></motion.div>
       )}
 
       <div className="p-6 flex flex-col items-center justify-center relative z-10">
@@ -187,22 +220,26 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
            </div>
            
            <div className="flex items-center gap-3">
-             <button 
+             <motion.button 
+               whileHover={{ scale: 1.1 }}
+               whileTap={{ scale: 0.9 }}
                onClick={() => setIsMuted(!isMuted)}
                className="text-gray-500 hover:text-trading-gold transition-colors"
                title={isMuted ? "Unmute" : "Mute"}
              >
                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-             </button>
+             </motion.button>
              
              {onToggleMode && (
-               <button
+               <motion.button
+                 whileHover={{ scale: 1.1 }}
+                 whileTap={{ scale: 0.9 }}
                  onClick={onToggleMode}
                  className="text-gray-500 hover:text-trading-gold transition-colors"
                  title="Enter Widget Mode"
                >
                  <Expand size={16} />
-               </button>
+               </motion.button>
              )}
            </div>
         </div>
@@ -210,22 +247,33 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         {/* The Big Timer */}
         <div className="relative mb-2 min-h-[160px] flex items-center justify-center">
             {!isActive ? (
-                <button 
+                <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={initAudio}
-                    className="flex flex-col items-center gap-4 py-4 animate-pulse cursor-pointer group z-20"
+                    className="flex flex-col items-center gap-4 py-4 cursor-pointer group z-20"
                 >
-                    <div className="w-20 h-20 rounded-full border-2 border-trading-gold flex items-center justify-center group-hover:bg-trading-gold group-hover:text-black transition-all shadow-[0_0_20px_rgba(207,181,59,0.2)]">
+                    <motion.div 
+                       animate={{ boxShadow: ['0 0 20px rgba(207,181,59,0.2)', '0 0 40px rgba(207,181,59,0.5)', '0 0 20px rgba(207,181,59,0.2)'] }}
+                       transition={{ duration: 2, repeat: Infinity }}
+                       className="w-20 h-20 rounded-full border-2 border-trading-gold flex items-center justify-center group-hover:bg-trading-gold group-hover:text-black transition-all"
+                    >
                         <Zap size={32} />
-                    </div>
+                    </motion.div>
                     <span className="text-sm font-bold text-trading-gold uppercase tracking-widest">Activate Timer</span>
-                </button>
+                </motion.button>
             ) : (
-                <div className="flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
-                    <span className={`text-8xl md:text-9xl font-mono font-bold leading-none tracking-tighter tabular-nums transition-colors duration-100 ${
-                        isDangerZone ? 'text-red-500 scale-105' : 'text-white'
+                <div className="flex flex-col items-center">
+                    <motion.span 
+                        key={secondsLeft} // Key prop triggers re-animation on change
+                        initial={{ y: 5, opacity: 0.5 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 800, damping: 30 }}
+                        className={`text-8xl md:text-9xl font-mono font-bold leading-none tracking-tighter tabular-nums transition-colors duration-100 ${
+                        isDangerZone ? 'text-red-500' : 'text-white'
                     }`}>
                         {secondsLeft === 60 ? '00' : secondsLeft.toString().padStart(2, '0')}
-                    </span>
+                    </motion.span>
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-[0.5em] mt-2">
                         Seconds Left
                     </span>
@@ -234,22 +282,22 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         </div>
 
         {/* L3SR Label */}
-        <div className={`mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
-            isDangerZone 
-            ? 'bg-red-500 text-black border-red-500 scale-110' 
-            : isActive 
+        <motion.div 
+            animate={isDangerZone ? { scale: 1.1, backgroundColor: "#ef4444", color: "#000000", borderColor: "#ef4444" } : {}}
+            className={`mt-6 px-4 py-2 rounded-lg border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
+             isActive 
                 ? 'bg-black/40 text-gray-500 border-gray-800'
                 : 'bg-black/20 text-gray-700 border-gray-800 opacity-50'
         }`}>
             {isDangerZone ? 'L3SR ALERT: WATCH!' : 'Wait for :57'}
-        </div>
+        </motion.div>
 
         <p className="text-[10px] text-gray-600 mt-4 text-center max-w-[200px]">
            {isActive ? 'Synced to Atomic Clock. Click Expand icon for pop-out mode.' : 'Timer is offline. Click Activate to sync.'}
         </p>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

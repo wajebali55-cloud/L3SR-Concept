@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Certificate from './Certificate';
 import { Trophy, ArrowRight, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- DATA: STATIC EDUCATIONAL SCENARIOS ---
 const QUIZ_DATA = [
@@ -161,23 +162,39 @@ const ScenarioSimulator: React.FC = () => {
         </div>
         <div className="flex flex-col items-end">
           <div className="text-sm text-gray-400">Score</div>
-          <div className="text-xl font-mono font-bold text-trading-success">{score} Points</div>
+          <motion.div 
+            key={score} 
+            initial={{ scale: 1.5, color: '#fff' }} 
+            animate={{ scale: 1, color: '#00c076' }} 
+            className="text-xl font-mono font-bold text-trading-success"
+          >
+            {score} Points
+          </motion.div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full h-2 bg-gray-800 rounded-full mb-8">
-        <div 
-          className="h-full bg-trading-accent rounded-full transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        ></div>
+      <div className="w-full h-2 bg-gray-800 rounded-full mb-8 overflow-hidden">
+        <motion.div 
+          className="h-full bg-trading-accent rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        ></motion.div>
       </div>
 
       {/* MAIN CARD */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div 
+        key={currentIdx}
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -50 }}
+        transition={{ duration: 0.3 }}
+        className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         
         {/* Left: Context / Setup */}
-        <div className="bg-trading-card border border-gray-800 rounded-xl p-6 flex flex-col justify-between">
+        <div className="bg-trading-card border border-gray-800 rounded-xl p-6 flex flex-col justify-between shadow-xl">
            <div>
              <h3 className="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4">Market Context</h3>
              
@@ -205,7 +222,7 @@ const ScenarioSimulator: React.FC = () => {
         </div>
 
         {/* Right: The Micro Event */}
-        <div className="bg-trading-card border border-gray-800 rounded-xl p-6 flex flex-col relative overflow-hidden">
+        <div className="bg-trading-card border border-gray-800 rounded-xl p-6 flex flex-col relative overflow-hidden shadow-xl">
            
            <h3 className="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4 text-center">
              Microscope View: Last 3 Seconds
@@ -225,13 +242,25 @@ const ScenarioSimulator: React.FC = () => {
            </div>
 
            {/* Feedback Overlay */}
+           <AnimatePresence>
            {hasAnswered && (
-             <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center animate-[fadeIn_0.3s_ease-out]">
-                {isCorrect ? (
-                  <CheckCircle className="text-green-500 mb-4 w-16 h-16" />
-                ) : (
-                  <XCircle className="text-red-500 mb-4 w-16 h-16" />
-                )}
+             <motion.div 
+               initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+               animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
+               exit={{ opacity: 0 }}
+               className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center p-6 text-center"
+             >
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  {isCorrect ? (
+                    <CheckCircle className="text-green-500 mb-4 w-16 h-16 mx-auto" />
+                  ) : (
+                    <XCircle className="text-red-500 mb-4 w-16 h-16 mx-auto" />
+                  )}
+                </motion.div>
                 
                 <h3 className={`text-2xl font-bold mb-2 ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
                   {isCorrect ? 'Correct!' : 'Incorrect'}
@@ -241,42 +270,56 @@ const ScenarioSimulator: React.FC = () => {
                   {currentScenario.explanation}
                 </p>
 
-                <button 
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={nextQuestion}
-                  className="px-8 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 flex items-center gap-2"
+                  className="px-8 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 flex items-center gap-2 mx-auto"
                 >
                   Next Scenario <ArrowRight size={18} />
-                </button>
-             </div>
+                </motion.button>
+             </motion.div>
            )}
+           </AnimatePresence>
 
         </div>
-      </div>
+      </motion.div>
 
       {/* CONTROLS */}
       {!hasAnswered && (
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <button 
+        <motion.div 
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.2 }}
+           className="grid grid-cols-3 gap-4 mt-6"
+        >
+          <motion.button 
+            whileHover={{ scale: 1.02, backgroundColor: "#16a34a" }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => handleAnswer('BUY')}
-            className="py-4 bg-trading-success hover:bg-green-600 rounded-xl text-white font-bold text-xl shadow-[0_4px_0_#008c56] active:translate-y-1 active:shadow-none transition-all"
+            className="py-4 bg-trading-success rounded-xl text-white font-bold text-xl shadow-[0_4px_0_#008c56] active:shadow-none active:translate-y-[4px] transition-all"
           >
             BUY
-          </button>
+          </motion.button>
           
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02, backgroundColor: "#dc2626" }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => handleAnswer('SELL')}
-            className="py-4 bg-trading-danger hover:bg-red-600 rounded-xl text-white font-bold text-xl shadow-[0_4px_0_#b32b23] active:translate-y-1 active:shadow-none transition-all"
+            className="py-4 bg-trading-danger rounded-xl text-white font-bold text-xl shadow-[0_4px_0_#b32b23] active:shadow-none active:translate-y-[4px] transition-all"
           >
             SELL
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02, backgroundColor: "#4b5563" }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => handleAnswer('NO_TRADE')}
-            className="py-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-gray-200 font-bold text-xl shadow-[0_4px_0_#374151] active:translate-y-1 active:shadow-none transition-all"
+            className="py-4 bg-gray-700 rounded-xl text-gray-200 font-bold text-xl shadow-[0_4px_0_#374151] active:shadow-none active:translate-y-[4px] transition-all"
           >
             SKIP / AVOID
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
 
       {/* Hint Text */}

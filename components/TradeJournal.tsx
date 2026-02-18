@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TradeLog } from '../types';
 import { Plus, Trash2, TrendingUp, TrendingDown, Percent, Calendar, Target, Activity, PieChart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const TradeJournal: React.FC = () => {
   const [trades, setTrades] = useState<TradeLog[]>([]);
@@ -66,14 +67,31 @@ const TradeJournal: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">My Trade Journal</h2>
-          <p className="text-gray-400">Log your L3SR executions to track your consistency.</p>
+          <motion.h2 
+            initial={{ opacity: 0, x: -20 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            className="text-3xl font-bold text-white mb-2"
+          >
+            My Trade Journal
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ delay: 0.1 }}
+            className="text-gray-400"
+          >
+            Log your L3SR executions to track your consistency.
+          </motion.p>
         </div>
-        <div className="bg-trading-card border border-gray-800 px-4 py-2 rounded-lg flex gap-4 text-xs font-mono text-gray-400">
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }} 
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-trading-card border border-gray-800 px-4 py-2 rounded-lg flex gap-4 text-xs font-mono text-gray-400"
+        >
            <div><span className="text-trading-success font-bold">{wins}</span> W</div>
            <div><span className="text-trading-danger font-bold">{losses}</span> L</div>
            <div><span className="text-gray-200 font-bold">{breakevens}</span> BE</div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -83,24 +101,41 @@ const TradeJournal: React.FC = () => {
            
            {/* MAIN STATS */}
            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between">
+              <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between shadow-lg">
                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Total Win Rate</div>
-                 <div className={`text-3xl font-mono font-bold ${Number(winRate) >= 60 ? 'text-trading-success' : Number(winRate) >= 40 ? 'text-yellow-500' : 'text-trading-danger'}`}>
+                 <motion.div 
+                   key={winRate}
+                   initial={{ scale: 0.8, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   className={`text-3xl font-mono font-bold ${Number(winRate) >= 60 ? 'text-trading-success' : Number(winRate) >= 40 ? 'text-yellow-500' : 'text-trading-danger'}`}
+                 >
                    {winRate}%
-                 </div>
+                 </motion.div>
                  <div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
-                    <div className="bg-white h-full transition-all duration-500" style={{ width: `${winRate}%` }}></div>
+                    <motion.div 
+                      className="bg-white h-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${winRate}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
                  </div>
-              </div>
-              <div className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between">
+              </motion.div>
+              <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between shadow-lg">
                   <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Total Trades</div>
-                  <div className="text-3xl font-mono font-bold text-white">{totalTrades}</div>
+                  <motion.div 
+                     key={totalTrades}
+                     initial={{ scale: 1.2 }}
+                     animate={{ scale: 1 }}
+                     className="text-3xl font-mono font-bold text-white"
+                  >
+                      {totalTrades}
+                  </motion.div>
                   <div className="text-[10px] text-gray-400 mt-2">Log every trade for accuracy.</div>
-              </div>
+              </motion.div>
            </div>
 
            {/* DIRECTIONAL STATS */}
-           <div className="bg-trading-card border border-gray-800 p-5 rounded-xl space-y-4">
+           <motion.div whileHover={{ scale: 1.01 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl space-y-4 shadow-lg">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                  <Target size={14} /> Directional Accuracy
               </h3>
@@ -112,7 +147,12 @@ const TradeJournal: React.FC = () => {
                     <span className="text-white font-mono">{buyAccuracy}% ({buyWins}/{buyTotal})</span>
                  </div>
                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full transition-all duration-500" style={{ width: `${buyAccuracy}%` }}></div>
+                    <motion.div 
+                      className="bg-green-500 h-full" 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${buyAccuracy}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    />
                  </div>
               </div>
 
@@ -123,13 +163,24 @@ const TradeJournal: React.FC = () => {
                     <span className="text-white font-mono">{sellAccuracy}% ({sellWins}/{sellTotal})</span>
                  </div>
                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-red-500 h-full transition-all duration-500" style={{ width: `${sellAccuracy}%` }}></div>
+                    <motion.div 
+                      className="bg-red-500 h-full" 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${sellAccuracy}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    />
                  </div>
               </div>
-           </div>
+           </motion.div>
 
            {/* Add Trade Form */}
-           <form onSubmit={addTrade} className="bg-trading-card border border-gray-800 p-6 rounded-xl space-y-4 relative overflow-hidden">
+           <motion.form 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.2 }}
+             onSubmit={addTrade} 
+             className="bg-trading-card border border-gray-800 p-6 rounded-xl space-y-4 relative overflow-hidden shadow-xl"
+           >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-trading-gold to-yellow-600"></div>
               <h3 className="text-lg font-bold text-white mb-2">Log New Entry</h3>
               
@@ -139,7 +190,7 @@ const TradeJournal: React.FC = () => {
                   type="text" 
                   value={pair} 
                   onChange={(e) => setPair(e.target.value)}
-                  className="w-full bg-[#0a0b0d] border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-trading-gold outline-none uppercase font-mono tracking-wider"
+                  className="w-full bg-[#0a0b0d] border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-trading-gold outline-none uppercase font-mono tracking-wider transition-colors"
                   placeholder="e.g. EURUSD"
                 />
               </div>
@@ -175,10 +226,15 @@ const TradeJournal: React.FC = () => {
                  </div>
               </div>
 
-              <button type="submit" className="w-full bg-trading-gold text-black font-bold py-3 rounded-lg hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 mt-2 shadow-[0_0_15px_rgba(207,181,59,0.2)] hover:shadow-[0_0_25px_rgba(207,181,59,0.4)] transform active:scale-[0.98]">
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit" 
+                className="w-full bg-trading-gold text-black font-bold py-3 rounded-lg hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 mt-2 shadow-[0_0_15px_rgba(207,181,59,0.2)]"
+              >
                  <Plus size={18} /> Add To Journal
-              </button>
-           </form>
+              </motion.button>
+           </motion.form>
         </div>
 
         {/* RIGHT: History List */}
@@ -190,23 +246,42 @@ const TradeJournal: React.FC = () => {
                     Trading History
                  </h3>
                  {trades.length > 0 && (
-                   <button onClick={() => { if(window.confirm('Delete all history?')) setTrades([]); }} className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors">
+                   <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { if(window.confirm('Delete all history?')) setTrades([]); }} 
+                      className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors"
+                    >
                       <Trash2 size={12} /> Clear Log
-                   </button>
+                   </motion.button>
                  )}
               </div>
               
-              <div className="flex-1 overflow-y-auto max-h-[600px]">
+              <div className="flex-1 overflow-y-auto max-h-[600px] custom-scrollbar">
+                 <AnimatePresence mode="popLayout">
                  {trades.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-50">
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.5 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center justify-center h-full text-gray-500"
+                    >
                        <PieChart size={48} className="mb-4 text-gray-700" />
                        <p>No trades logged yet.</p>
                        <p className="text-xs mt-1">Start tracking your L3SR journey.</p>
-                    </div>
+                    </motion.div>
                  ) : (
                     <div className="divide-y divide-gray-800/50">
                        {trades.map((trade) => (
-                         <div key={trade.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group">
+                         <motion.div 
+                            layout
+                            key={trade.id}
+                            initial={{ opacity: 0, height: 0, x: -20 }}
+                            animate={{ opacity: 1, height: 'auto', x: 0 }}
+                            exit={{ opacity: 0, height: 0, x: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group"
+                         >
                             <div className="flex items-center gap-4">
                                {/* Result Icon */}
                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-inner ${trade.result === 'WIN' ? 'bg-trading-success/10 text-trading-success border border-trading-success/20' : trade.result === 'LOSS' ? 'bg-trading-danger/10 text-trading-danger border border-trading-danger/20' : 'bg-gray-700/20 text-gray-400 border border-gray-700'}`}>
@@ -228,13 +303,19 @@ const TradeJournal: React.FC = () => {
                                </div>
                             </div>
                             
-                            <button onClick={() => deleteTrade(trade.id)} className="text-gray-700 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-all">
+                            <motion.button 
+                              whileHover={{ scale: 1.1, color: "#ef4444" }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => deleteTrade(trade.id)} 
+                              className="text-gray-700 p-2 opacity-0 group-hover:opacity-100 transition-all"
+                            >
                                <Trash2 size={18} />
-                            </button>
-                         </div>
+                            </motion.button>
+                         </motion.div>
                        ))}
                     </div>
                  )}
+                 </AnimatePresence>
               </div>
            </div>
         </div>
