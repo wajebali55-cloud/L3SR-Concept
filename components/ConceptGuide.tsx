@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, TrendingUp, Anchor, AlertTriangle, Eye, Activity, Sun, Zap, School, ArrowLeft, ArrowRight, CheckCircle2, XCircle, MousePointerClick, ChevronRight, BookOpen, PlayCircle, Map, Target } from 'lucide-react';
+import { Clock, TrendingUp, Anchor, AlertTriangle, Eye, Activity, Sun, Zap, School, ArrowLeft, ArrowRight, CheckCircle2, XCircle, MousePointerClick, ChevronRight, BookOpen, PlayCircle, Map, Target, Hammer } from 'lucide-react';
 import CandleAnimation from './CandleAnimation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -391,29 +391,29 @@ const ConceptGuide: React.FC<ConceptGuideProps> = ({ lang = 'en' }) => {
   return (
     <div className="w-full max-w-[95%] mx-auto space-y-12 pb-20">
       
-      {/* Beginner Mode Call-to-Action */}
-      <div className="bg-gradient-to-r from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
-         <div className="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+      {/* Beginner Mode Call-to-Action (DISABLED / UNDER DEVELOPMENT) */}
+      <div className="bg-gradient-to-r from-gray-800/40 to-gray-900/40 border border-gray-700/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group opacity-75">
+         <div className="absolute inset-0 bg-gray-500/5 group-hover:bg-gray-500/10 transition-colors"></div>
          <div className="flex items-center gap-4 relative z-10">
-            <div className="bg-green-500 p-4 rounded-full text-black shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse shrink-0">
+            <div className="bg-gray-700 p-4 rounded-full text-gray-400 shrink-0">
                 <School size={28} />
             </div>
             <div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-300 mb-1">
                     {lang === 'en' ? 'Total Beginner?' : 'Bilkul Naye Hain?'}
                 </h3>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-500 text-sm">
                     {lang === 'en' 
-                     ? "Take our step-by-step 'Zero to Hero' interactive course." 
-                     : "Hamara 'Zero to Hero' step-by-step course lein."}
+                     ? "Zero to Hero interactive course is currently under development." 
+                     : "'Zero to Hero' course abhi ban raha hai."}
                 </p>
             </div>
          </div>
          <button 
-           onClick={() => setMode('beginner')}
-           className="relative z-10 w-full md:w-auto bg-green-500 hover:bg-green-400 text-black font-bold py-4 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap transform hover:scale-105"
+           disabled
+           className="relative z-10 w-full md:w-auto bg-gray-800 text-gray-500 font-bold py-4 px-8 rounded-xl border border-gray-700 cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
          >
-            {lang === 'en' ? 'Start Beginner Course' : 'Beginner Course Shuru Karein'} <PlayCircle size={20} fill="black" className="text-green-500" />
+            {lang === 'en' ? 'Coming Soon' : 'Jald Araha Hai'} <Hammer size={20} />
          </button>
       </div>
       
@@ -618,7 +618,7 @@ const ConceptGuide: React.FC<ConceptGuideProps> = ({ lang = 'en' }) => {
                         <span className="text-xs text-blue-400 font-bold uppercase tracking-wider block mb-1">
                             {lang === 'en' ? 'Best Time (Local Broker Time)' : 'Behtareen Waqt (Local Broker Time)'}
                         </span>
-                        <div className="text-2xl md:text-3xl font-mono font-bold text-white flex items-center gap-3">
+                        <div className="text-3xl font-mono font-bold text-white flex items-center gap-3">
                             6:00 PM <span className="text-gray-600">-</span> 7:00 PM
                         </div>
                     </div>
