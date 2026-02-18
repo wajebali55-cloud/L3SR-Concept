@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TradeLog } from '../types';
-import { Plus, Trash2, TrendingUp, TrendingDown, Calendar, Target, Activity, PieChart, Flame, Trophy, AlertCircle, BookOpen, Database, Save } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, Calendar, Target, Activity, PieChart, Flame, Trophy, AlertCircle, BookOpen, Database, Save, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TradeJournal: React.FC = () => {
@@ -45,6 +45,39 @@ const TradeJournal: React.FC = () => {
 
   const deleteTrade = (id: string) => {
     setTrades(trades.filter(t => t.id !== id));
+  };
+
+  const exportToCSV = () => {
+    if (trades.length === 0) return;
+    
+    // Define headers
+    const headers = ['Date', 'Time', 'Pair', 'Direction', 'Result', 'Note'];
+    
+    // Convert data to CSV rows
+    const csvContent = [
+      headers.join(','),
+      ...trades.map(t => {
+        const dateObj = new Date(t.date);
+        return [
+          dateObj.toLocaleDateString(),
+          dateObj.toLocaleTimeString(),
+          t.pair,
+          t.direction,
+          t.result,
+          `"${t.note?.replace(/"/g, '""') || ''}"` // Escape quotes in notes
+        ].join(',');
+      })
+    ].join('\n');
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `L3SR_Journal_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // --- ANALYTICS ENGINE ---
@@ -302,16 +335,31 @@ const TradeJournal: React.FC = () => {
                     <Calendar size={18} className="text-trading-gold" />
                     Recent History
                  </h3>
-                 {trades.length > 0 && (
-                   <motion.button 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => { if(window.confirm('Delete all history? This cannot be undone.')) setTrades([]); }} 
-                      className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors border border-red-500/20"
-                    >
-                      <Trash2 size={12} /> Clear All
-                   </motion.button>
-                 )}
+                 
+                 <div className="flex items-center gap-2">
+                    {trades.length > 0 && (
+                      <>
+                        <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={exportToCSV}
+                            className="text-xs text-trading-gold hover:text-white flex items-center gap-1 bg-trading-gold/10 px-3 py-1.5 rounded hover:bg-trading-gold/20 transition-colors border border-trading-gold/20"
+                            title="Download as CSV"
+                        >
+                            <Download size={12} /> Export CSV
+                        </motion.button>
+
+                        <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => { if(window.confirm('Delete all history? This cannot be undone.')) setTrades([]); }} 
+                            className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors border border-red-500/20"
+                        >
+                            <Trash2 size={12} /> Clear All
+                        </motion.button>
+                      </>
+                    )}
+                 </div>
               </div>
               
               {/* Trades List */}
