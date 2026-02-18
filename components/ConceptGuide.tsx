@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, TrendingUp, Anchor, AlertTriangle, Eye, Activity } from 'lucide-react';
+import { Clock, TrendingUp, Anchor, AlertTriangle, Eye, Activity, Sun, Zap } from 'lucide-react';
 import CandleAnimation from './CandleAnimation';
 
 interface ConceptGuideProps {
@@ -186,14 +186,82 @@ const ConceptGuide: React.FC<ConceptGuideProps> = ({ lang = 'en' }) => {
         </div>
       </section>
 
-      {/* Best Time */}
-      <section className="flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-trading-accent/10 to-transparent p-6 rounded-xl border border-trading-accent/20">
-        <div>
-          <h4 className="text-xl font-bold text-white mb-1">{lang === 'en' ? 'Best Trading Time' : 'Behtareen Waqt'}</h4>
-          <p className="text-gray-400 text-sm">{lang === 'en' ? 'Volatility is key for L3SR to work.' : 'L3SR ke liye volatility zaroori hai.'}</p>
-        </div>
-        <div className="mt-4 md:mt-0 bg-trading-bg px-6 py-3 rounded-lg border border-gray-700 font-mono text-xl font-bold text-trading-accent">
-          13:00 - 17:00
+      {/* Optimal Trading Window */}
+      <section className="bg-gradient-to-br from-[#0f172a] to-[#1e293b] rounded-2xl p-6 md:p-8 border border-blue-900/30 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-20 bg-blue-500/5 blur-3xl rounded-full pointer-events-none"></div>
+        
+        <div className="flex flex-col md:flex-row gap-8 relative z-10">
+            <div className="flex-1 space-y-6">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-widest mb-3 border border-blue-500/20">
+                        <Sun size={12} /> {lang === 'en' ? 'Performance Insight' : 'Performance Insight'}
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                        {lang === 'en' ? 'Optimal Trading Window' : 'Behtareen Trading Waqt'}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                        {lang === 'en' 
+                         ? 'Based on live testing, L3SR shows stronger consistency during high-liquidity periods.'
+                         : 'Live testing ki bunyad par, L3SR high-liquidity auqat mein zyada mustaqil مزاجi dikhata hai.'}
+                    </p>
+                </div>
+
+                <div className="bg-black/30 border border-blue-500/20 p-6 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span className="text-xs text-blue-400 font-bold uppercase tracking-wider block mb-1">
+                            {lang === 'en' ? 'Best Time (Local Broker Time)' : 'Behtareen Waqt (Local Broker Time)'}
+                        </span>
+                        <div className="text-3xl font-mono font-bold text-white flex items-center gap-3">
+                            6:00 PM <span className="text-gray-600">-</span> 7:00 PM
+                        </div>
+                    </div>
+                    <div className="hidden md:block">
+                        <div className="p-3 bg-blue-500/10 rounded-full text-blue-400 animate-pulse">
+                            <Clock size={24} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-trading-card border border-gray-800 p-5 rounded-xl">
+                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                        <Zap size={16} className="text-trading-gold" />
+                        {lang === 'en' ? 'Why This Window Works Better' : 'Ye Waqt Behtar Kyun Hai?'}
+                    </h4>
+                    <ul className="space-y-2">
+                        {[
+                            lang === 'en' ? 'Increased market liquidity' : 'Market liquidity mein izafa',
+                            lang === 'en' ? 'Cleaner 1-minute candle structure' : 'Saaf 1-minute candle structure',
+                            lang === 'en' ? 'Stronger rejection clarity in final seconds' : 'Akhri seconds mein rejection ki wazahat',
+                            lang === 'en' ? 'Reduced micro-noise compared to low-volume hours' : 'Kam volume hours ke muqable mein kam shor'
+                        ].map((point, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
+                                <div className="mt-1.5 w-1 h-1 bg-trading-gold rounded-full shrink-0"></div>
+                                {point}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+
+            <div className="md:w-1/3 flex flex-col justify-center space-y-4 border-t md:border-t-0 md:border-l border-gray-700/50 pt-6 md:pt-0 md:pl-8">
+                 <div className="bg-orange-500/5 border border-orange-500/20 p-4 rounded-lg">
+                    <h5 className="text-orange-400 font-bold text-sm mb-2 flex items-center gap-2">
+                        <AlertTriangle size={14} /> {lang === 'en' ? 'Important Note' : 'Zaroori Note'}
+                    </h5>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                        {lang === 'en' 
+                         ? 'L3SR can work outside this window; however, performance tends to improve when applied during active market conditions.'
+                         : 'L3SR is waqt ke ilawa bhi kaam kar sakta hai, lekin active market conditions mein iski karkardagi behtar hoti hai.'}
+                    </p>
+                 </div>
+
+                 <div className="text-[10px] text-gray-500 italic leading-relaxed">
+                    <span className="font-bold text-gray-400">{lang === 'en' ? 'Professional Insight:' : 'Professional Insight:'}</span> <br/>
+                    {lang === 'en' 
+                     ? 'Market conditions may vary. Users are encouraged to forward-test and adapt based on volatility and broker environment.'
+                     : 'Market ke halat mukhtalif ho sakte hain. Users ko mashwara diya jata hai ke wo volatility aur broker ke mahol ke mutabiq test karein.'}
+                 </div>
+            </div>
         </div>
       </section>
 

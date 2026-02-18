@@ -29,13 +29,14 @@ const App: React.FC = () => {
 
   // Security: Check for valid session token on load
   useEffect(() => {
-    let token = localStorage.getItem('__l3sr_secure_session_v1');
-    if (!token) {
-      token = sessionStorage.getItem('__l3sr_secure_session_v1');
-    }
-    if (token && token.length > 5 && /^[0-9a-f]+$/i.test(token)) {
+    // Check LocalStorage immediately
+    const token = localStorage.getItem('__l3sr_secure_session_v1');
+    
+    // Validate if token exists
+    if (token && token.length > 5) {
       setIsAuthenticated(true);
     }
+    
     setIsCheckingAuth(false);
 
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -64,28 +65,21 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = (token: string) => {
-    const hasConsent = localStorage.getItem('l3sr_cookie_consent') === 'true';
-    if (hasConsent) {
-      localStorage.setItem('__l3sr_secure_session_v1', token);
-    } else {
-      sessionStorage.setItem('__l3sr_secure_session_v1', token);
-    }
+    // FIX: Always save to LocalStorage to ensure persistence after refresh
+    localStorage.setItem('__l3sr_secure_session_v1', token);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('__l3sr_secure_session_v1');
-    sessionStorage.removeItem('__l3sr_secure_session_v1');
     setIsAuthenticated(false);
     setPage(PageState.HOME);
-    setShowRiskSplash(true);
+    setShowRiskSplash(true); // Reset splash on logout
   };
 
   const handleCookieAccept = () => {
-    const sessionToken = sessionStorage.getItem('__l3sr_secure_session_v1');
-    if (sessionToken) {
-      localStorage.setItem('__l3sr_secure_session_v1', sessionToken);
-    }
+    // Just a UI handler now, as we force localStorage for the key
+    localStorage.setItem('l3sr_cookie_consent', 'true');
   };
 
   const toggleLanguage = () => {
@@ -100,14 +94,18 @@ const App: React.FC = () => {
 
   if (isCheckingAuth) return null;
 
+  // FLOW CONTROL:
+  // 1. Show Risk Splash First (The Cover)
   if (showRiskSplash) {
     return <RiskSplash onEnter={() => setShowRiskSplash(false)} lang={lang} />;
   }
 
+  // 2. If Risk Accepted but Not Logged In -> Show Access Gate
   if (!isAuthenticated) {
     return <AccessGate onUnlock={handleLogin} lang={lang} />;
   }
 
+  // 3. If Authenticated and Widget Mode Active -> Show Widget
   if (isWidgetMode) {
     return <L3SRTimer mode="widget" onToggleMode={() => setIsWidgetMode(false)} />;
   }
