@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Certificate from './Certificate';
-import { Trophy, ArrowRight, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
+import { Trophy, ArrowRight, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, Minus, Info, ArrowUp, ArrowDown, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- DATA: STATIC EDUCATIONAL SCENARIOS ---
@@ -111,7 +111,7 @@ const ScenarioSimulator: React.FC = () => {
           <div className="h-40 w-16 bg-gray-800 rounded relative overflow-hidden border border-gray-700 mx-auto">
              <div className="absolute bottom-0 w-full bg-green-500 animate-[pulse_1s_infinite] transition-all duration-500 h-[90%]"></div>
              <div className="absolute top-2 left-0 right-0 text-center text-[10px] text-white font-bold bg-black/50">00:59</div>
-             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-2xl">⬆</div>
+             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50"><ArrowUp size={24} /></div>
           </div>
         );
       case 'STRONG_PUSH_DOWN':
@@ -119,7 +119,7 @@ const ScenarioSimulator: React.FC = () => {
           <div className="h-40 w-16 bg-gray-800 rounded relative overflow-hidden border border-gray-700 mx-auto">
              <div className="absolute top-0 w-full bg-red-500 animate-[pulse_1s_infinite] transition-all duration-500 h-[90%]"></div>
              <div className="absolute top-2 left-0 right-0 text-center text-[10px] text-white font-bold bg-black/50">00:59</div>
-             <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/50 text-2xl">⬇</div>
+             <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/50"><ArrowDown size={24} /></div>
           </div>
         );
       case 'DOJI':
@@ -141,7 +141,7 @@ const ScenarioSimulator: React.FC = () => {
       default: // Choppy
         return (
           <div className="h-40 w-16 bg-gray-800 rounded relative border border-gray-700 mx-auto flex items-center justify-center">
-             <div className="text-4xl">?</div>
+             <div className="text-gray-500"><HelpCircle size={32} /></div>
              <div className="absolute top-2 left-0 right-0 text-center text-[10px] text-white font-bold bg-black/50">00:59</div>
           </div>
         );
