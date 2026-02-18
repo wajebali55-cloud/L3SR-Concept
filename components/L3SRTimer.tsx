@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Zap, Maximize, Minimize } from 'lucide-react';
+import { Volume2, VolumeX, Zap, Maximize, Minimize, Expand } from 'lucide-react';
 
 interface L3SRTimerProps {
   mode?: 'default' | 'widget';
+  onToggleMode?: () => void;
 }
 
-const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default' }) => {
+const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode }) => {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -110,39 +111,55 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default' }) => {
         )}
 
         {/* Controls Overlay */}
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 flex gap-2">
            <button 
              onClick={() => setIsMuted(!isMuted)}
-             className="text-white/50 hover:text-white transition-colors bg-black/20 p-2 rounded-full backdrop-blur-sm"
+             className="text-white/50 hover:text-white transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm"
+             title={isMuted ? "Unmute" : "Mute"}
            >
              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
            </button>
+           
+           {onToggleMode && (
+             <button 
+               onClick={onToggleMode}
+               className="text-white/50 hover:text-white transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm"
+               title="Exit Widget Mode"
+             >
+               <Minimize size={20} />
+             </button>
+           )}
         </div>
 
         {/* Activation Overlay */}
         {!isActive && (
            <div className="absolute inset-0 z-40 bg-black flex items-center justify-center cursor-pointer" onClick={initAudio}>
-              <div className="flex flex-col items-center gap-4 animate-pulse">
-                 <div className="p-6 rounded-full border-4 border-trading-gold/50 shadow-[0_0_50px_rgba(207,181,59,0.3)]">
-                    <Zap className="text-trading-gold" size={64} />
+              <div className="flex flex-col items-center gap-4 animate-pulse px-4 text-center">
+                 <div className="p-4 md:p-6 rounded-full border-4 border-trading-gold/50 shadow-[0_0_50px_rgba(207,181,59,0.3)]">
+                    <Zap className="text-trading-gold" size={48} />
                  </div>
-                 <span className="text-trading-gold font-bold uppercase tracking-widest text-lg">Tap to Sync</span>
+                 <span className="text-trading-gold font-bold uppercase tracking-widest text-sm md:text-lg">Tap to Sync</span>
               </div>
            </div>
         )}
 
         {/* Main Display */}
-        <div className={`relative z-10 flex flex-col items-center justify-center w-full transition-opacity duration-500 ${!isActive ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`relative z-10 flex flex-col items-center justify-center w-full h-full transition-opacity duration-500 ${!isActive ? 'opacity-0' : 'opacity-100'}`}>
+            {/* 
+                Use vmin for font-size. 
+                This ensures the text fits whether the window is tall (mobile) or wide (strip). 
+                40vmin means 40% of the *smallest* dimension.
+            */}
             <span className={`font-mono font-bold leading-none tracking-tighter tabular-nums select-none transition-all duration-75 ${
                 isCritical ? 'text-white scale-110' : 
                 isDangerZone ? 'text-red-500' : 'text-white'
-            }`} style={{ fontSize: '35vw' }}>
+            }`} style={{ fontSize: '45vmin', lineHeight: '1' }}>
                 {secondsLeft.toString().padStart(2, '0')}
             </span>
             
-            <div className={`mt-4 px-6 py-2 rounded-full font-bold uppercase tracking-[0.5em] text-sm md:text-xl transition-all ${
+            <div className={`mt-[2vmin] px-6 py-2 rounded-full font-bold uppercase tracking-[0.5em] transition-all ${
                 isDangerZone ? 'bg-red-500 text-black animate-pulse' : 'bg-white/10 text-gray-500'
-            }`}>
+            }`} style={{ fontSize: '4vmin' }}>
                 {isDangerZone ? 'REJECT' : 'WAIT'}
             </div>
         </div>
@@ -169,12 +186,25 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default' }) => {
               </span>
            </div>
            
-           <button 
-             onClick={() => setIsMuted(!isMuted)}
-             className="text-gray-500 hover:text-trading-gold transition-colors"
-           >
-             {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-           </button>
+           <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setIsMuted(!isMuted)}
+               className="text-gray-500 hover:text-trading-gold transition-colors"
+               title={isMuted ? "Unmute" : "Mute"}
+             >
+               {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+             </button>
+             
+             {onToggleMode && (
+               <button
+                 onClick={onToggleMode}
+                 className="text-gray-500 hover:text-trading-gold transition-colors"
+                 title="Enter Widget Mode"
+               >
+                 <Expand size={16} />
+               </button>
+             )}
+           </div>
         </div>
 
         {/* The Big Timer */}
@@ -215,7 +245,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default' }) => {
         </div>
 
         <p className="text-[10px] text-gray-600 mt-4 text-center max-w-[200px]">
-           {isActive ? 'Synced to Atomic Clock. Resize window for widget.' : 'Timer is offline. Click Activate to sync.'}
+           {isActive ? 'Synced to Atomic Clock. Click Expand icon for pop-out mode.' : 'Timer is offline. Click Activate to sync.'}
         </p>
 
       </div>

@@ -36,10 +36,22 @@ const App: React.FC = () => {
   }, []);
 
   // Window Resize Listener for Widget Mode
-  // If the window is small (e.g., resized pop-out), we switch to widget mode
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 500 && window.innerHeight < 650) {
+      // Logic to distinguish "Small Window (Popout)" from "Mobile Device"
+      // Mobile devices usually have height > 600px even when width is small.
+      // A popout timer window is usually small in BOTH dimensions or very short.
+      
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Condition 1: Small Box (Typical Popout) e.g. 400x400
+      const isSmallBox = w < 550 && h < 650;
+      
+      // Condition 2: Horizontal Strip (Bottom of screen timer) e.g. 1000x200
+      const isStrip = h < 500;
+
+      if (isSmallBox || isStrip) {
         setIsWidgetMode(true);
       } else {
         setIsWidgetMode(false);
@@ -77,7 +89,8 @@ const App: React.FC = () => {
 
   // --- WIDGET MODE RENDER ---
   if (isWidgetMode) {
-    return <L3SRTimer mode="widget" />;
+    // Pass a handler to manually exit widget mode if it triggered accidentally
+    return <L3SRTimer mode="widget" onToggleMode={() => setIsWidgetMode(false)} />;
   }
 
   // --- DUMMY DATA FOR WIDGETS ---
@@ -235,7 +248,7 @@ const App: React.FC = () => {
                 {/* RIGHT COLUMN: The Timer (5 Cols) */}
                 <div className="lg:col-span-5">
                    <div className="sticky top-24 space-y-6">
-                     <L3SRTimer />
+                     <L3SRTimer onToggleMode={() => setIsWidgetMode(true)} />
                      
                      {/* Removed Strategy Tip Card as requested */}
 
