@@ -9,6 +9,7 @@ import PreFlightChecklist from './components/PreFlightChecklist';
 import AccuracyGuide from './components/AccuracyGuide';
 import LegalDocs from './components/LegalDocs';
 import CookieConsent from './components/CookieConsent';
+import RiskSplash from './components/RiskSplash'; // Import the new Splash Screen
 import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,6 +19,10 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isWidgetMode, setIsWidgetMode] = useState(false);
+  
+  // New State: Controls the initial Horror/Risk Splash Screen
+  // We default to TRUE unless we find a session, then we might skip it (optional, but let's keep it for drama)
+  const [showRiskSplash, setShowRiskSplash] = useState(true);
 
   // Security: Check for valid session token on load
   useEffect(() => {
@@ -32,6 +37,10 @@ const App: React.FC = () => {
     // Validate the token format
     if (token && token.length > 5 && /^[0-9a-f]+$/i.test(token)) {
       setIsAuthenticated(true);
+      // Optional: If they are already logged in, maybe skip the splash? 
+      // For now, let's keep the splash because the user asked for it to be the "First screen"
+      // But for better UX, if authenticated, we could set showRiskSplash(false).
+      // Let's keep it true to satisfy "Open website -> Horror Screen".
     }
     setIsCheckingAuth(false);
 
@@ -85,6 +94,7 @@ const App: React.FC = () => {
     sessionStorage.removeItem('__l3sr_secure_session_v1');
     setIsAuthenticated(false);
     setPage(PageState.HOME);
+    setShowRiskSplash(true); // Reset splash on logout
   };
 
   // Called when user clicks "Accept All" on the banner
@@ -105,15 +115,24 @@ const App: React.FC = () => {
 
   if (isCheckingAuth) return null;
 
+  // --- VIEW LOGIC ---
+
+  // 1. Show Risk Splash Screen First
+  if (showRiskSplash) {
+    return <RiskSplash onEnter={() => setShowRiskSplash(false)} />;
+  }
+
+  // 2. Then Show Access Gate (Login)
   if (!isAuthenticated) {
     return <AccessGate onUnlock={handleLogin} />;
   }
 
-  // --- WIDGET MODE RENDER ---
+  // 3. Widget Mode Check
   if (isWidgetMode) {
     return <L3SRTimer mode="widget" onToggleMode={() => setIsWidgetMode(false)} />;
   }
 
+  // 4. Main App Render
   // --- DUMMY DATA FOR WIDGETS ---
   const currentHour = new Date().getHours();
   const session = currentHour >= 8 && currentHour < 16 ? 'LONDON' : currentHour >= 13 && currentHour < 21 ? 'NEW YORK' : 'ASIAN';
