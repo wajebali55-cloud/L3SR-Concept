@@ -83,14 +83,12 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
       // 2. Start Silent Loop (Keeps tab active on Mobile/Safari)
       if (silentAudioRef.current) {
         silentAudioRef.current.play().catch(() => {
-           // Auto-play policy might block this until user interaction, 
-           // but since this function is called on Click, it should work.
            console.log("Silent audio start failed"); 
         });
       }
 
       // 3. Play warm-up tone
-      playTone(0, 'sine', 0.01);
+      playTone(600, 'sine', 0.1);
       
       setIsActive(true);
     } catch (e) {
@@ -107,20 +105,28 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
     }
 
     try {
+      const t = audioCtxRef.current.currentTime;
       const osc = audioCtxRef.current.createOscillator();
       const gain = audioCtxRef.current.createGain();
 
       osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
+      osc.frequency.setValueAtTime(freq, t);
       
-      gain.gain.setValueAtTime(0.1, audioCtxRef.current.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtxRef.current.currentTime + duration);
+      // VOLUME CONFIG: MAX HIGH
+      // Sine waves set to 1.0 (100%).
+      // Square waves set to 0.6 because they are naturally louder/harsher and distort if set to 1.0.
+      const volume = type === 'square' ? 0.6 : 1.0; 
+
+      // Better Envelope: Attack -> Sustain -> Release
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(volume, t + 0.05); // Rapid attack to max volume
+      gain.gain.exponentialRampToValueAtTime(0.001, t + duration); // Smooth decay
 
       osc.connect(gain);
       gain.connect(audioCtxRef.current.destination);
 
-      osc.start();
-      osc.stop(audioCtxRef.current.currentTime + duration);
+      osc.start(t);
+      osc.stop(t + duration + 0.1); // Stop slightly after decay
     } catch (e) {
       console.error("Play tone error", e);
     }
@@ -130,26 +136,31 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
   const handleTick = () => {
       const now = new Date();
       const currentSecond = now.getSeconds();
-      
       const remaining = 60 - currentSecond;
-      const displaySec = remaining === 60 ? 0 : remaining;
+      const displaySec = remaining === 60 ? 0 : remaining; // Display 00 at 60
       
       setSecondsLeft(prev => prev !== displaySec ? displaySec : prev);
 
-      // Audio Triggers
+      // --- AUDIO TRIGGERS ---
+      // We check 'remaining' which represents seconds left until the next minute.
+      // 4 = :56 (Yellow Visual Only), 3 = :57 (Sound), 2 = :58 (Sound), 1 = :59 (Sound)
       if (remaining <= 4 && remaining >= 1) {
+          // Play only if we haven't played this second yet
           if (lastPlayedSecondRef.current !== remaining) {
               lastPlayedSecondRef.current = remaining;
               
-              // REVERTED TO ORIGINAL SOUNDS
-              if (remaining === 4) playTone(440, 'sine', 0.15); // 56s - Pre-Alert
-              if (remaining === 3) playTone(600, 'sine', 0.1); // 57s - Alert (L3SR Start)
-              if (remaining === 2) playTone(800, 'sine', 0.1); // 58s - Warning
-              if (remaining === 1) playTone(1200, 'square', 0.4); // 59s - EXECUTE
+              // REMOVED 4s SOUND (Visuals handled in render)
+              if (remaining === 3) playTone(600, 'sine', 0.2);  // :57 - L3SR Start
+              else if (remaining === 2) playTone(800, 'sine', 0.2);  // :58 - Warning
+              else if (remaining === 1) playTone(1200, 'square', 0.5); // :59 - EXECUTE
           }
       } else {
-          if (remaining > 5) {
-              lastPlayedSecondRef.current = null;
+          // Reset logic when we are outside the danger zone (e.g., :00 to :55)
+          // Use a range check to be safe
+          if (remaining > 5 || remaining === 60) {
+              if (lastPlayedSecondRef.current !== null) {
+                  lastPlayedSecondRef.current = null;
+              }
           }
       }
       
@@ -175,6 +186,7 @@ const L3SRTimer: React.FC<L3SRTimerProps> = ({ mode = 'default', onToggleMode })
         silentAudioRef.current.currentTime = 0;
       }
       setSecondsLeft(0);
+      lastPlayedSecondRef.current = null;
     }
   }, [isActive]);
 
