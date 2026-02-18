@@ -3,7 +3,7 @@ import {
   Quote, Sparkles, Feather, Hash, 
   Scale, ShieldAlert, Shield, Users, Target, Moon, 
   BrainCircuit, MessageSquareX, Heart, BookOpen, AlertTriangle, 
-  TrendingUp, TrendingDown, Ghost, Pickaxe, Anchor, LucideIcon
+  TrendingUp, TrendingDown, Ghost, Pickaxe, Anchor, LucideIcon, Send, MessageCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -267,6 +267,34 @@ const QuotesGallery: React.FC = () => {
                </div>
             </motion.div>
          ))}
+
+         {/* SUBMISSION CARD (NEW) */}
+         <motion.div 
+            variants={item}
+            className="h-full flex flex-col justify-center items-center bg-gradient-to-br from-trading-card to-[#1a1a1a] border border-trading-gold/30 border-dashed p-8 rounded-2xl hover:bg-trading-gold/5 transition-all duration-300 text-center relative overflow-hidden group"
+         >
+             <div className="bg-trading-gold/10 p-4 rounded-full text-trading-gold mb-6 group-hover:scale-110 transition-transform">
+                <Send size={32} />
+             </div>
+             
+             <h3 className="text-xl font-bold text-white mb-2">Share Your Wisdom</h3>
+             <p className="text-gray-400 text-sm mb-6 max-w-xs">
+                Do you have a trading quote or insight that changed your career? Submit it to us.
+             </p>
+
+             <div className="flex gap-3">
+                <a href="https://wa.me/447473938781" target="_blank" rel="noreferrer" className="bg-[#25D366] hover:bg-[#128C7E] text-black p-3 rounded-full transition-colors" title="Submit via WhatsApp">
+                   <MessageCircle size={20} />
+                </a>
+                <a href="mailto:xtechnext.info@gmail.com" className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors" title="Submit via Email">
+                   <Send size={20} />
+                </a>
+             </div>
+             <div className="text-[10px] text-gray-500 mt-4 uppercase tracking-wider">
+                Reviewed by XTN Team
+             </div>
+         </motion.div>
+
       </motion.div>
 
     </div>

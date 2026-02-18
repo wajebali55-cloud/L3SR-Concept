@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Lock, ScrollText, Copyright, Scale, AlertTriangle, FileCheck, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, Lock, ScrollText, Copyright, Scale, AlertTriangle, FileCheck, ArrowLeft, ShieldCheck, HelpCircle, MessageCircle, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 type LegalPageType = 'DISCLAIMER' | 'PRIVACY' | 'TERMS' | 'IP';
@@ -235,6 +235,27 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
                 <p className="text-xs text-gray-600">
                    Last Updated: {new Date().toLocaleDateString()} &bull; L3SR Premium Suite
                 </p>
+             </div>
+          </motion.div>
+
+          {/* HELP SECTION (NEW) */}
+          <motion.div 
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             transition={{ delay: 0.8 }}
+             className="mt-8 flex flex-col items-center justify-center text-center gap-3"
+          >
+             <div className="text-sm font-bold text-gray-500 flex items-center gap-2">
+                 <HelpCircle size={16} /> Have questions about these terms?
+             </div>
+             <div className="flex gap-4">
+                 <a href="https://wa.me/447473938781" target="_blank" rel="noreferrer" className="text-xs text-[#25D366] hover:underline flex items-center gap-1">
+                    <MessageCircle size={12} /> Contact on WhatsApp
+                 </a>
+                 <span className="text-gray-700">|</span>
+                 <a href="mailto:xtechnext.info@gmail.com" className="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                    <Mail size={12} /> Email Support
+                 </a>
              </div>
           </motion.div>
 

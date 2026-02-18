@@ -10,8 +10,9 @@ import AccuracyGuide from './components/AccuracyGuide';
 import LegalDocs from './components/LegalDocs';
 import CookieConsent from './components/CookieConsent';
 import RiskSplash from './components/RiskSplash';
-import QuotesGallery from './components/QuotesGallery'; // NEW IMPORT
-import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale, Feather } from 'lucide-react';
+import QuotesGallery from './components/QuotesGallery';
+import ContactPage from './components/ContactPage'; // NEW IMPORT
+import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale, Feather, MessageCircle, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -177,7 +178,8 @@ const App: React.FC = () => {
                 { label: 'Strategy Guide', value: PageState.GUIDE, icon: null },
                 { label: 'Accuracy', value: PageState.ACCURACY, icon: null },
                 { label: 'Simulator', value: PageState.SIMULATOR, icon: null },
-                { label: 'Wisdom', value: PageState.QUOTES, icon: null }, // NEW ITEM
+                { label: 'Wisdom', value: PageState.QUOTES, icon: null },
+                { label: 'Contact', value: PageState.CONTACT, icon: null }, // NEW ITEM
               ].map((item) => (
                 <motion.button 
                   key={item.label}
@@ -245,6 +247,7 @@ const App: React.FC = () => {
                 <button onClick={() => navigate(PageState.ACCURACY)} className="block px-3 py-3 rounded-md text-base font-medium text-trading-gold w-full text-left border-b border-gray-800/50">Accuracy Protocol</button>
                 <button onClick={() => navigate(PageState.SIMULATOR)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Simulator</button>
                 <button onClick={() => navigate(PageState.QUOTES)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Quotes & Wisdom</button>
+                <button onClick={() => navigate(PageState.CONTACT)} className="block px-3 py-3 rounded-md text-base font-medium text-white w-full text-left border-b border-gray-800/50">Contact Support</button>
                 <button onClick={() => navigate(PageState.JOURNAL)} className="block px-3 py-3 rounded-md text-base font-medium text-gray-300 w-full text-left border-b border-gray-800/50">My Journal</button>
                 <div className="py-2"></div>
                 <button onClick={() => navigate(PageState.DISCLAIMER)} className="block px-3 py-2 rounded-md text-sm font-medium text-gray-400 w-full text-left">Disclaimer</button>
@@ -465,6 +468,20 @@ const App: React.FC = () => {
             </motion.div>
           )}
 
+          {/* CONTACT PAGE RENDER */}
+          {page === PageState.CONTACT && (
+            <motion.div 
+              key="contact"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+            >
+               <ContactPage />
+            </motion.div>
+          )}
+
           {page === PageState.JOURNAL && (
             <motion.div 
               key="journal"
@@ -518,6 +535,9 @@ const App: React.FC = () => {
                L3SR PREMIUM
             </p>
             <p className="text-gray-500 text-xs mt-1">Authorized Personnel Only. Private Educational Suite.</p>
+            <div className="mt-2 text-[10px] text-gray-600 font-medium flex items-center justify-center md:justify-start gap-1">
+               <Cpu size={10} /> Powered by <span className="text-gray-400 font-bold">XTN (xtechnext)</span>
+            </div>
           </div>
           
           {/* New Legal Links - Linked to specific states */}
