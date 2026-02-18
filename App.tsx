@@ -132,7 +132,7 @@ const App: React.FC = () => {
       
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-trading-bg/80 backdrop-blur-xl border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Logo Area */}
@@ -273,7 +273,7 @@ const App: React.FC = () => {
                {/* Premium Background Effects */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-trading-gold/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 relative z-10">
+              <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 pb-16 relative z-10">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   
@@ -420,7 +420,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+              className="w-full px-4 sm:px-6 lg:px-8 py-12"
             >
                <ConceptGuide lang={lang} />
             </motion.div>
@@ -433,7 +433,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="w-full px-4 sm:px-6 lg:px-8"
             >
                <AccuracyGuide lang={lang} />
             </motion.div>
@@ -446,7 +446,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center"
+              className="w-full px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center"
             >
               <ScenarioSimulator lang={lang} />
             </motion.div>
@@ -459,7 +459,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="w-full px-4 sm:px-6 lg:px-8"
             >
                <QuotesGallery lang={lang} />
             </motion.div>
@@ -472,7 +472,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="w-full px-4 sm:px-6 lg:px-8"
             >
                <ContactPage lang={lang} />
             </motion.div>
@@ -485,7 +485,7 @@ const App: React.FC = () => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="w-full px-4 sm:px-6 lg:px-8"
             >
               <TradeJournal lang={lang} />
             </motion.div>
@@ -524,7 +524,7 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="bg-trading-card border-t border-gray-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-white font-bold flex items-center gap-2 justify-center md:justify-start">
                <Crown size={14} className="text-trading-gold" />

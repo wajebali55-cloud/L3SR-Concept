@@ -8,7 +8,7 @@ interface ConceptGuideProps {
 
 const ConceptGuide: React.FC<ConceptGuideProps> = ({ lang = 'en' }) => {
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-20">
+    <div className="w-full max-w-[95%] mx-auto space-y-12 pb-20">
       
       {/* Intro */}
       <section className="space-y-6">

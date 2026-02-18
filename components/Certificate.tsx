@@ -46,7 +46,7 @@ const Certificate: React.FC<CertificateProps> = ({ userName, onRestart }) => {
     <div className="w-full flex flex-col items-center gap-6 py-4 animate-[fadeIn_0.5s_ease-out]">
       
       {/* Container - Reduced width for a cleaner, less "over" look */}
-      <div className="w-full max-w-3xl px-2">
+      <div className="w-full max-w-[1000px] px-2">
         
         {/* Certificate Box - Standard Certificate Ratio */}
         <div 

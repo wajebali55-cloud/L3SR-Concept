@@ -154,7 +154,7 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack, lang = 'en' }) => {
 
   return (
     <div className="min-h-screen py-12 px-4">
-       <div className="max-w-3xl mx-auto">
+       <div className="w-full max-w-[90%] mx-auto">
           
           {/* Back Button */}
           <motion.button 

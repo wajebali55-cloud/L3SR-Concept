@@ -256,7 +256,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
 
   if (!isPlaying && (feedback?.title === "Course Complete" || feedback?.title === "Course Mukammal")) {
      return (
-        <div className="w-full max-w-5xl mx-auto py-8 px-4 flex flex-col items-center animate-in fade-in duration-500">
+        <div className="w-full max-w-full md:max-w-[95%] mx-auto py-8 px-4 flex flex-col items-center animate-in fade-in duration-500">
              <div className="bg-trading-card border border-trading-gold/30 p-8 rounded-3xl w-full text-center mb-8 shadow-[0_0_50px_rgba(207,181,59,0.1)]">
                  <Trophy size={64} className="text-trading-gold mx-auto mb-4 animate-bounce" />
                  <h2 className="text-3xl font-bold text-white mb-2">{lang === 'en' ? 'Drill Mastered!' : 'Drill Mastered!'}</h2>
@@ -279,7 +279,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
 
   if (!userName && !isPlaying) {
     return (
-      <div className="w-full max-w-lg mx-auto py-16 px-4">
+      <div className="w-full max-w-xl mx-auto py-16 px-4">
         <div className="bg-trading-card border border-gray-800 p-8 rounded-3xl shadow-2xl">
            <div className="text-center mb-8">
               <div className="w-16 h-16 bg-trading-gold/10 rounded-full flex items-center justify-center mx-auto mb-4 text-trading-gold border border-trading-gold/30">
@@ -316,7 +316,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
 
   if (!isPlaying) {
       return (
-        <div className="w-full max-w-2xl mx-auto py-12 px-4 text-center">
+        <div className="w-full max-w-3xl mx-auto py-12 px-4 text-center">
              <div className="bg-trading-card border border-trading-gold/30 p-8 md:p-12 rounded-3xl relative overflow-hidden">
                 <div className="absolute inset-0 bg-trading-gold/5 animate-pulse pointer-events-none"></div>
                 
@@ -384,7 +384,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-2 md:p-4 flex flex-col items-center justify-center min-h-[500px]">
+    <div className="w-full max-w-[95%] mx-auto p-2 md:p-4 flex flex-col items-center justify-center min-h-[500px]">
       
       <div className="w-full flex flex-wrap justify-between items-center mb-6 bg-gray-900/50 p-4 rounded-xl border border-gray-800 gap-4">
          <div className="flex items-center gap-1">
@@ -400,7 +400,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
          </div>
       </div>
 
-      <div className="relative w-full max-w-[350px] aspect-square bg-[#0f1115] rounded-3xl border-4 border-gray-800 shadow-2xl overflow-hidden flex flex-col mx-auto">
+      <div className="relative w-full max-w-[450px] aspect-square bg-[#0f1115] rounded-3xl border-4 border-gray-800 shadow-2xl overflow-hidden flex flex-col mx-auto">
          
          <div className={`h-12 w-full flex items-center justify-center border-b border-white/5 transition-colors duration-300 ${currentScenario.level === 'RESISTANCE' ? 'bg-red-900/20 border-red-500/30' : ''}`}>
              {currentScenario.level === 'RESISTANCE' && <span className="text-[10px] font-bold text-red-500 bg-black/50 px-2 py-1 rounded">RESISTANCE</span>}
@@ -409,12 +409,12 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ lang = 'en' }) =>
          <div className="flex-1 relative flex items-center justify-center">
              
              <div className="relative flex flex-col items-center justify-center w-20">
-                 <div className="absolute w-0.5 h-48 bg-gray-700 z-0"></div>
+                 <div className="absolute w-0.5 h-64 bg-gray-700 z-0"></div>
                  <motion.div 
                     key={currentIdx + roundState} 
                     initial={roundState === 'WAIT' ? { height: 40, backgroundColor: '#4b5563', y: 0 } : false}
                     animate={getCandleAnimation()}
-                    className="w-6 md:w-8 z-10 rounded-sm shadow-lg relative"
+                    className="w-8 md:w-12 z-10 rounded-sm shadow-lg relative"
                  >
                      {roundState === 'ACTION' && currentScenario.last3s !== 'STALL' && (
                          <div className={`absolute inset-0 blur-lg opacity-50 ${currentScenario.last3s === 'PUSH_UP' ? 'bg-green-500' : 'bg-red-500'}`}></div>

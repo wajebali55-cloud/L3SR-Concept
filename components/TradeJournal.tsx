@@ -125,7 +125,7 @@ const TradeJournal: React.FC = () => {
   const bestPair = getBestPair();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
+    <div className="w-full px-4 py-8 pb-24">
       
       {/* HEADER SECTION */}
       <div className="mb-10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">

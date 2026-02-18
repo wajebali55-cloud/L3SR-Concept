@@ -25,7 +25,7 @@ const AccuracyGuide: React.FC<AccuracyGuideProps> = ({ lang = 'en' }) => {
   const [activeTab, setActiveTab] = useState<TabType>('GENERAL');
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 pb-24">
+    <div className="w-full px-4 py-12 pb-24">
       
       {/* Header Section */}
       <div className="text-center mb-10 space-y-4">

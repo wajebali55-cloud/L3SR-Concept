@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 pb-24">
+    <div className="w-full max-w-[95%] mx-auto px-4 py-12 pb-24">
       
       {/* Header */}
       <div className="text-center mb-16 space-y-4">

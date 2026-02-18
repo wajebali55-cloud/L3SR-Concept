@@ -197,7 +197,7 @@ const QuotesGallery: React.FC<QuotesGalleryProps> = ({ lang = 'en' }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 pb-24">
+    <div className="w-full px-4 py-12 pb-24">
       
       <div className="text-center mb-16 space-y-4">
          <motion.div 
@@ -226,7 +226,7 @@ const QuotesGallery: React.FC<QuotesGalleryProps> = ({ lang = 'en' }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.8 }}
-        className="relative w-full max-w-5xl mx-auto mb-20 mt-10 group px-4 md:px-0"
+        className="relative w-full max-w-[95%] mx-auto mb-20 mt-10 group px-4 md:px-0"
       >
          <div className="absolute inset-0 bg-gradient-to-r from-trading-gold/20 via-yellow-900/10 to-transparent blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-700"></div>
          
