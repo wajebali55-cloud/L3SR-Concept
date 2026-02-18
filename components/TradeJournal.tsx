@@ -1,41 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { TradeLog } from '../types';
-import { Plus, Trash2, TrendingUp, TrendingDown, Percent, Calendar, Target, Activity, PieChart } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, Calendar, Target, Activity, PieChart, Flame, Trophy, AlertCircle, BookOpen, Database, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TradeJournal: React.FC = () => {
-  const [trades, setTrades] = useState<TradeLog[]>([]);
+  // --- LAZY INITIALIZATION FOR ROBUST STORAGE ---
+  // We read from LocalStorage immediately when state initializes.
+  // This prevents race conditions where empty state might overwrite saved data.
+  const [trades, setTrades] = useState<TradeLog[]>(() => {
+    try {
+        const saved = localStorage.getItem('l3sr_journal');
+        return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+        console.error("Failed to load journal", e);
+        return [];
+    }
+  });
+
   const [pair, setPair] = useState('EURUSD');
   const [direction, setDirection] = useState<'BUY' | 'SELL'>('BUY');
   const [result, setResult] = useState<'WIN' | 'LOSS' | 'BREAKEVEN'>('WIN');
+  const [note, setNote] = useState('');
   
-  // Load from LocalStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('l3sr_journal');
-    if (saved) {
-      try {
-        setTrades(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to load journal");
-      }
-    }
-  }, []);
-
-  // Save to LocalStorage
+  // Save to LocalStorage whenever 'trades' changes
   useEffect(() => {
     localStorage.setItem('l3sr_journal', JSON.stringify(trades));
   }, [trades]);
 
   const addTrade = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!pair.trim()) return;
+
     const newTrade: TradeLog = {
       id: Date.now().toString(),
       date: Date.now(),
-      pair: pair.toUpperCase(),
+      pair: pair.toUpperCase().trim(),
       direction,
-      result
+      result,
+      note: note.trim()
     };
     setTrades([newTrade, ...trades]);
+    setNote(''); // Reset note
   };
 
   const deleteTrade = (id: string) => {
@@ -46,260 +51,326 @@ const TradeJournal: React.FC = () => {
   const totalTrades = trades.length;
   const wins = trades.filter(t => t.result === 'WIN').length;
   const losses = trades.filter(t => t.result === 'LOSS').length;
-  const breakevens = trades.filter(t => t.result === 'BREAKEVEN').length;
+  const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(0) : "0";
+  const netScore = wins - losses;
 
-  // Win Rate Calculation
-  // Formula: (Wins / Total) * 100
-  const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
+  // Streak Calculation
+  const calculateStreak = () => {
+    if (trades.length === 0) return { count: 0, type: 'NONE' };
+    let count = 0;
+    const type = trades[0].result;
+    if (type === 'BREAKEVEN') return { count: 0, type: 'NONE' };
 
-  // Directional Analysis
-  const buyTrades = trades.filter(t => t.direction === 'BUY');
-  const buyWins = buyTrades.filter(t => t.result === 'WIN').length;
-  const buyTotal = buyTrades.length;
-  const buyAccuracy = buyTotal > 0 ? ((buyWins / buyTotal) * 100).toFixed(1) : "0.0";
+    for (const t of trades) {
+      if (t.result === type) count++;
+      else break;
+    }
+    return { count, type };
+  };
+  const streak = calculateStreak();
 
-  const sellTrades = trades.filter(t => t.direction === 'SELL');
-  const sellWins = sellTrades.filter(t => t.result === 'WIN').length;
-  const sellTotal = sellTrades.length;
-  const sellAccuracy = sellTotal > 0 ? ((sellWins / sellTotal) * 100).toFixed(1) : "0.0";
+  // Best Pair Logic
+  const getBestPair = () => {
+    const pairMap: Record<string, { wins: number, total: number }> = {};
+    trades.forEach(t => {
+        if (!pairMap[t.pair]) pairMap[t.pair] = { wins: 0, total: 0 };
+        pairMap[t.pair].total++;
+        if (t.result === 'WIN') pairMap[t.pair].wins++;
+    });
+    
+    let best = 'N/A';
+    let maxWins = -1;
+
+    Object.entries(pairMap).forEach(([key, val]) => {
+        if (val.wins > maxWins) {
+            maxWins = val.wins;
+            best = key;
+        }
+    });
+    return totalTrades > 0 ? best : 'N/A';
+  };
+  const bestPair = getBestPair();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
+      
+      {/* HEADER SECTION */}
+      <div className="mb-10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
         <div>
-          <motion.h2 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            className="text-3xl font-bold text-white mb-2"
-          >
-            My Trade Journal
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: 0.1 }}
-            className="text-gray-400"
-          >
-            Log your L3SR executions to track your consistency.
-          </motion.p>
+            <motion.h2 
+                initial={{ opacity: 0, y: -20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="text-3xl md:text-4xl font-bold text-white mb-2"
+            >
+                Trading <span className="text-trading-gold">Journal</span>
+            </motion.h2>
+            <p className="text-gray-400 max-w-2xl">
+                Professional traders don't just trade; they track. Log every execution to uncover your hidden strengths and weaknesses.
+            </p>
         </div>
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }} 
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-trading-card border border-gray-800 px-4 py-2 rounded-lg flex gap-4 text-xs font-mono text-gray-400"
-        >
-           <div><span className="text-trading-success font-bold">{wins}</span> W</div>
-           <div><span className="text-trading-danger font-bold">{losses}</span> L</div>
-           <div><span className="text-gray-200 font-bold">{breakevens}</span> BE</div>
-        </motion.div>
+        
+        {/* Storage Indicator */}
+        <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
+            <Database size={12} className="text-green-500" />
+            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Auto-Save Active</span>
+        </div>
+      </div>
+
+      {/* 1. HUD (HEADS UP DISPLAY) - STATS GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          
+          {/* Card 1: Win Rate */}
+          <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col items-center md:items-start relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10"><Activity size={48} /></div>
+             <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Win Rate</div>
+             <div className={`text-3xl font-mono font-bold ${Number(winRate) >= 60 ? 'text-trading-success' : Number(winRate) >= 40 ? 'text-yellow-500' : 'text-trading-danger'}`}>
+                {winRate}%
+             </div>
+             <div className="text-[10px] text-gray-400 mt-1">{wins}W - {losses}L</div>
+          </motion.div>
+
+          {/* Card 2: Net Score */}
+          <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col items-center md:items-start relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10"><Target size={48} /></div>
+             <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Net Score</div>
+             <div className="text-3xl font-mono font-bold text-white">
+                {netScore > 0 ? `+${netScore}` : netScore}
+             </div>
+             <div className="text-[10px] text-gray-400 mt-1">Total Trades: {totalTrades}</div>
+          </motion.div>
+
+          {/* Card 3: Streak */}
+          <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col items-center md:items-start relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10"><Flame size={48} /></div>
+             <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Current Streak</div>
+             <div className={`text-3xl font-mono font-bold ${streak.type === 'WIN' ? 'text-trading-success' : streak.type === 'LOSS' ? 'text-trading-danger' : 'text-gray-400'}`}>
+                {streak.type === 'WIN' ? `+${streak.count}` : streak.type === 'LOSS' ? `-${streak.count}` : '0'}
+             </div>
+             <div className="text-[10px] text-gray-400 mt-1">
+                {streak.type === 'WIN' ? 'Momentum!' : streak.type === 'LOSS' ? 'Stop & Review' : 'Neutral'}
+             </div>
+          </motion.div>
+
+          {/* Card 4: Best Pair */}
+          <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col items-center md:items-start relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10"><Trophy size={48} /></div>
+             <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Best Asset</div>
+             <div className="text-3xl font-mono font-bold text-trading-gold truncate w-full text-center md:text-left">
+                {bestPair}
+             </div>
+             <div className="text-[10px] text-gray-400 mt-1">Based on Wins</div>
+          </motion.div>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT: Input Form & Stats */}
-        <div className="lg:col-span-4 space-y-6">
-           
-           {/* MAIN STATS */}
-           <div className="grid grid-cols-2 gap-4">
-              <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-                 <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Total Win Rate</div>
-                 <motion.div 
-                   key={winRate}
-                   initial={{ scale: 0.8, opacity: 0 }}
-                   animate={{ scale: 1, opacity: 1 }}
-                   className={`text-3xl font-mono font-bold ${Number(winRate) >= 60 ? 'text-trading-success' : Number(winRate) >= 40 ? 'text-yellow-500' : 'text-trading-danger'}`}
-                 >
-                   {winRate}%
-                 </motion.div>
-                 <div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="bg-white h-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${winRate}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                    />
-                 </div>
-              </motion.div>
-              <motion.div whileHover={{ y: -5 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Total Trades</div>
-                  <motion.div 
-                     key={totalTrades}
-                     initial={{ scale: 1.2 }}
-                     animate={{ scale: 1 }}
-                     className="text-3xl font-mono font-bold text-white"
-                  >
-                      {totalTrades}
-                  </motion.div>
-                  <div className="text-[10px] text-gray-400 mt-2">Log every trade for accuracy.</div>
-              </motion.div>
-           </div>
-
-           {/* DIRECTIONAL STATS */}
-           <motion.div whileHover={{ scale: 1.01 }} className="bg-trading-card border border-gray-800 p-5 rounded-xl space-y-4 shadow-lg">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                 <Target size={14} /> Directional Accuracy
+        {/* LEFT COLUMN: ENTRY FORM (4 Cols) */}
+        <div className="lg:col-span-4">
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="bg-trading-card border border-gray-800 rounded-xl p-6 relative overflow-hidden shadow-2xl"
+           >
+              <div className="absolute top-0 left-0 w-full h-1 bg-trading-gold"></div>
+              
+              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                  <Plus className="bg-gray-800 rounded p-1" size={24} /> Log New Trade
               </h3>
               
-              {/* Buy Stats */}
-              <div>
-                 <div className="flex justify-between text-xs mb-1">
-                    <span className="text-green-400 font-bold">BUY TRADES</span>
-                    <span className="text-white font-mono">{buyAccuracy}% ({buyWins}/{buyTotal})</span>
-                 </div>
-                 <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="bg-green-500 h-full" 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${buyAccuracy}%` }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
+              <form onSubmit={addTrade} className="space-y-6">
+                 {/* Asset Input */}
+                 <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Asset / Pair</label>
+                    <input 
+                       type="text" 
+                       value={pair}
+                       onChange={(e) => setPair(e.target.value)}
+                       placeholder="EURUSD"
+                       className="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-3 text-white font-mono uppercase focus:border-trading-gold focus:ring-1 focus:ring-trading-gold/20 outline-none transition-all"
                     />
                  </div>
-              </div>
 
-              {/* Sell Stats */}
-              <div>
-                 <div className="flex justify-between text-xs mb-1">
-                    <span className="text-red-400 font-bold">SELL TRADES</span>
-                    <span className="text-white font-mono">{sellAccuracy}% ({sellWins}/{sellTotal})</span>
-                 </div>
-                 <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="bg-red-500 h-full" 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${sellAccuracy}%` }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                    />
-                 </div>
-              </div>
-           </motion.div>
-
-           {/* Add Trade Form */}
-           <motion.form 
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.2 }}
-             onSubmit={addTrade} 
-             className="bg-trading-card border border-gray-800 p-6 rounded-xl space-y-4 relative overflow-hidden shadow-xl"
-           >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-trading-gold to-yellow-600"></div>
-              <h3 className="text-lg font-bold text-white mb-2">Log New Entry</h3>
-              
-              <div>
-                <label className="text-xs text-gray-500 block mb-1 uppercase tracking-wider font-bold">Pair / Asset</label>
-                <input 
-                  type="text" 
-                  value={pair} 
-                  onChange={(e) => setPair(e.target.value)}
-                  className="w-full bg-[#0a0b0d] border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-trading-gold outline-none uppercase font-mono tracking-wider transition-colors"
-                  placeholder="e.g. EURUSD"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <label className="text-xs text-gray-500 block mb-1 uppercase tracking-wider font-bold">Direction</label>
-                    <div className="flex bg-[#0a0b0d] rounded-lg p-1 border border-gray-700">
-                       <button 
+                 {/* Direction Toggle */}
+                 <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Direction</label>
+                    <div className="grid grid-cols-2 gap-3">
+                       <button
                          type="button"
                          onClick={() => setDirection('BUY')}
-                         className={`flex-1 py-2 rounded text-sm font-bold transition-all ${direction === 'BUY' ? 'bg-trading-success text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                       >BUY</button>
-                       <button 
+                         className={`py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                            direction === 'BUY' 
+                            ? 'bg-trading-success text-black shadow-[0_0_15px_rgba(0,192,118,0.3)]' 
+                            : 'bg-black/40 border border-gray-700 text-gray-500 hover:text-white'
+                         }`}
+                       >
+                         <TrendingUp size={16} /> BUY
+                       </button>
+                       <button
                          type="button"
                          onClick={() => setDirection('SELL')}
-                         className={`flex-1 py-2 rounded text-sm font-bold transition-all ${direction === 'SELL' ? 'bg-trading-danger text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                       >SELL</button>
+                         className={`py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                            direction === 'SELL' 
+                            ? 'bg-trading-danger text-white shadow-[0_0_15px_rgba(255,59,48,0.3)]' 
+                            : 'bg-black/40 border border-gray-700 text-gray-500 hover:text-white'
+                         }`}
+                       >
+                         <TrendingDown size={16} /> SELL
+                       </button>
                     </div>
                  </div>
 
-                 <div>
-                    <label className="text-xs text-gray-500 block mb-1 uppercase tracking-wider font-bold">Outcome</label>
-                    <select 
-                      value={result}
-                      onChange={(e) => setResult(e.target.value as any)}
-                      className={`w-full bg-[#0a0b0d] border border-gray-700 rounded-lg px-4 py-2.5 outline-none font-bold ${result === 'WIN' ? 'text-green-400' : result === 'LOSS' ? 'text-red-400' : 'text-gray-400'}`}
-                    >
-                      <option value="WIN">WIN</option>
-                      <option value="LOSS">LOSS</option>
-                      <option value="BREAKEVEN">BREAKEVEN</option>
-                    </select>
+                 {/* Result Toggle */}
+                 <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Outcome</label>
+                    <div className="grid grid-cols-3 gap-2">
+                       <button
+                         type="button"
+                         onClick={() => setResult('WIN')}
+                         className={`py-2 rounded-lg font-bold text-xs transition-all ${
+                            result === 'WIN' 
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                            : 'bg-black/40 border border-gray-700 text-gray-500'
+                         }`}
+                       >
+                         WIN
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => setResult('LOSS')}
+                         className={`py-2 rounded-lg font-bold text-xs transition-all ${
+                            result === 'LOSS' 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/50' 
+                            : 'bg-black/40 border border-gray-700 text-gray-500'
+                         }`}
+                       >
+                         LOSS
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => setResult('BREAKEVEN')}
+                         className={`py-2 rounded-lg font-bold text-xs transition-all ${
+                            result === 'BREAKEVEN' 
+                            ? 'bg-gray-500/20 text-gray-300 border border-gray-500/50' 
+                            : 'bg-black/40 border border-gray-700 text-gray-500'
+                         }`}
+                       >
+                         BE
+                       </button>
+                    </div>
                  </div>
-              </div>
 
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit" 
-                className="w-full bg-trading-gold text-black font-bold py-3 rounded-lg hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 mt-2 shadow-[0_0_15px_rgba(207,181,59,0.2)]"
-              >
-                 <Plus size={18} /> Add To Journal
-              </motion.button>
-           </motion.form>
+                 {/* Note Input */}
+                 <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Note (Optional)</label>
+                    <textarea 
+                       value={note}
+                       onChange={(e) => setNote(e.target.value)}
+                       placeholder="Why did you take this trade?"
+                       className="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-3 text-white text-sm focus:border-trading-gold focus:ring-1 focus:ring-trading-gold/20 outline-none transition-all h-20 resize-none"
+                    />
+                 </div>
+
+                 <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className="w-full bg-trading-gold text-black font-bold py-4 rounded-xl shadow-lg hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2"
+                 >
+                    <Save size={18} /> Save Entry
+                 </motion.button>
+
+              </form>
+           </motion.div>
+
+           {/* Tip Card */}
+           <div className="mt-4 bg-blue-900/10 border border-blue-900/30 p-4 rounded-lg flex items-start gap-3">
+              <BookOpen className="text-blue-400 shrink-0 mt-0.5" size={16} />
+              <p className="text-xs text-blue-200 leading-relaxed">
+                 <span className="font-bold">Pro Tip:</span> Log trades immediately after closing. Emotions fade quickly, but raw data stays honest.
+              </p>
+           </div>
         </div>
 
-        {/* RIGHT: History List */}
+        {/* RIGHT COLUMN: HISTORY LIST (8 Cols) */}
         <div className="lg:col-span-8">
-           <div className="bg-trading-card border border-gray-800 rounded-xl overflow-hidden min-h-[600px] flex flex-col">
+           <div className="bg-trading-card border border-gray-800 rounded-xl overflow-hidden min-h-[600px] flex flex-col shadow-2xl">
+              
+              {/* List Header */}
               <div className="px-6 py-5 border-b border-gray-800 flex justify-between items-center bg-[#0a0b0d]/50">
                  <h3 className="font-bold text-white flex items-center gap-2">
                     <Calendar size={18} className="text-trading-gold" />
-                    Trading History
+                    Recent History
                  </h3>
                  {trades.length > 0 && (
                    <motion.button 
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => { if(window.confirm('Delete all history?')) setTrades([]); }} 
-                      className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors"
+                      onClick={() => { if(window.confirm('Delete all history? This cannot be undone.')) setTrades([]); }} 
+                      className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500/20 transition-colors border border-red-500/20"
                     >
-                      <Trash2 size={12} /> Clear Log
+                      <Trash2 size={12} /> Clear All
                    </motion.button>
                  )}
               </div>
               
-              <div className="flex-1 overflow-y-auto max-h-[600px] custom-scrollbar">
+              {/* Trades List */}
+              <div className="flex-1 overflow-y-auto max-h-[800px] custom-scrollbar p-4 space-y-3">
                  <AnimatePresence mode="popLayout">
                  {trades.length === 0 ? (
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 0.5 }}
                       exit={{ opacity: 0 }}
-                      className="flex flex-col items-center justify-center h-full text-gray-500"
+                      className="flex flex-col items-center justify-center h-full text-gray-500 py-20"
                     >
-                       <PieChart size={48} className="mb-4 text-gray-700" />
-                       <p>No trades logged yet.</p>
-                       <p className="text-xs mt-1">Start tracking your L3SR journey.</p>
+                       <PieChart size={64} className="mb-4 text-gray-800" />
+                       <p className="text-lg font-medium">Your journal is empty</p>
+                       <p className="text-sm mt-1 max-w-xs text-center text-gray-600">Start logging your trades on the left to see analytics and improve your accuracy.</p>
                     </motion.div>
                  ) : (
-                    <div className="divide-y divide-gray-800/50">
-                       {trades.map((trade) => (
+                       trades.map((trade) => (
                          <motion.div 
                             layout
                             key={trade.id}
-                            initial={{ opacity: 0, height: 0, x: -20 }}
-                            animate={{ opacity: 1, height: 'auto', x: 0 }}
-                            exit={{ opacity: 0, height: 0, x: 20 }}
-                            transition={{ duration: 0.3 }}
-                            className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-black/20 border border-gray-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-gray-700 transition-colors group relative"
                          >
                             <div className="flex items-center gap-4">
-                               {/* Result Icon */}
-                               <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-inner ${trade.result === 'WIN' ? 'bg-trading-success/10 text-trading-success border border-trading-success/20' : trade.result === 'LOSS' ? 'bg-trading-danger/10 text-trading-danger border border-trading-danger/20' : 'bg-gray-700/20 text-gray-400 border border-gray-700'}`}>
-                                  {trade.result === 'WIN' ? 'W' : trade.result === 'LOSS' ? 'L' : '-'}
+                               {/* Result Badge */}
+                               <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold shadow-inner shrink-0 ${
+                                   trade.result === 'WIN' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 
+                                   trade.result === 'LOSS' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 
+                                   'bg-gray-700/20 text-gray-400 border border-gray-700'
+                               }`}>
+                                  <span className="text-lg leading-none">{trade.result === 'WIN' ? 'W' : trade.result === 'LOSS' ? 'L' : '-'}</span>
+                                  <span className="text-[9px] uppercase font-normal opacity-70 leading-none mt-1">{trade.result === 'BREAKEVEN' ? 'BE' : trade.result}</span>
                                </div>
                                
                                <div>
                                   <div className="flex items-center gap-3">
-                                     <span className="font-bold text-white font-mono text-lg">{trade.pair}</span>
-                                     <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${trade.direction === 'BUY' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                     <span className="font-bold text-white font-mono text-xl">{trade.pair}</span>
+                                     <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                         trade.direction === 'BUY' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                     }`}>
+                                        {trade.direction === 'BUY' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                                         {trade.direction}
                                      </span>
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                  
+                                  <div className="text-xs text-gray-500 mt-1.5 flex items-center gap-2">
                                      <span>{new Date(trade.date).toLocaleDateString()}</span>
-                                     <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                                     <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
                                      <span>{new Date(trade.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                   </div>
+
+                                  {trade.note && (
+                                     <div className="mt-2 text-xs text-gray-400 italic border-l-2 border-gray-700 pl-2">
+                                        "{trade.note}"
+                                     </div>
+                                  )}
                                </div>
                             </div>
                             
@@ -307,13 +378,13 @@ const TradeJournal: React.FC = () => {
                               whileHover={{ scale: 1.1, color: "#ef4444" }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => deleteTrade(trade.id)} 
-                              className="text-gray-700 p-2 opacity-0 group-hover:opacity-100 transition-all"
+                              className="absolute top-4 right-4 md:static text-gray-700 hover:bg-red-500/10 p-2 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                              title="Delete Entry"
                             >
                                <Trash2 size={18} />
                             </motion.button>
                          </motion.div>
-                       ))}
-                    </div>
+                       ))
                  )}
                  </AnimatePresence>
               </div>
