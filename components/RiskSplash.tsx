@@ -4,9 +4,10 @@ import { AlertTriangle, Skull, Activity, ArrowRight, Zap } from 'lucide-react';
 
 interface RiskSplashProps {
   onEnter: () => void;
+  lang?: 'en' | 'ur';
 }
 
-const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
+const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter, lang = 'en' }) => {
   const [isLeaving, setIsLeaving] = useState(false);
 
   const handleEnter = () => {
@@ -74,7 +75,7 @@ const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
                 transition={{ delay: 0.5, duration: 0.8 }}
                 className="text-4xl md:text-6xl font-black text-white tracking-tighter"
               >
-                WELCOME TO <span className="text-red-600">TRADING</span>
+                {lang === 'en' ? 'WELCOME TO ' : 'WELCOME TO '} <span className="text-red-600">TRADING</span>
               </motion.h1>
               
               <motion.div 
@@ -93,9 +94,19 @@ const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
               className="relative py-4"
             >
                <p className="text-lg md:text-2xl text-gray-400 font-bold leading-relaxed tracking-wide">
-                 Where you pay for every single mistake with <span className="text-red-500 inline-block border-b border-red-500/50">DOLLARS</span>
+                 {lang === 'en' ? (
+                   <>
+                     Where you pay for every single mistake with <span className="text-red-500 inline-block border-b border-red-500/50">DOLLARS</span>
+                   </>
+                 ) : (
+                   <>
+                     Yahan har ghalti ki qeemat apko <span className="text-red-500 inline-block border-b border-red-500/50">DOLLARS</span> mein deni paray gi.
+                   </>
+                 )}
                  <br className="hidden md:block" />
-                 <span className="text-sm md:text-lg text-gray-600 font-normal mt-2 block uppercase tracking-[0.2em]">Not Apologies.</span>
+                 <span className="text-sm md:text-lg text-gray-600 font-normal mt-2 block uppercase tracking-[0.2em]">
+                   {lang === 'en' ? 'Not Apologies.' : 'Koi maafi nahi.'}
+                 </span>
                </p>
             </motion.div>
 
@@ -108,7 +119,9 @@ const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
             >
                <div className="flex items-center gap-3 justify-center text-red-400">
                   <Activity size={18} className="animate-pulse" />
-                  <span className="text-xs uppercase tracking-widest font-bold">High Risk Environment Detected</span>
+                  <span className="text-xs uppercase tracking-widest font-bold">
+                    {lang === 'en' ? 'High Risk Environment Detected' : 'High Risk Environment Detected'}
+                  </span>
                </div>
             </motion.div>
 
@@ -121,14 +134,14 @@ const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
             >
               <button 
                 onClick={handleEnter}
-                className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-transparent hover:bg-red-600 text-red-600 hover:text-white border border-red-600 rounded-none transition-all duration-300 uppercase tracking-[0.2em] font-bold text-sm md:text-base overflow-hidden"
+                className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-transparent hover:bg-red-600 text-red-600 hover:text-white border border-red-600 rounded-none transition-all duration-300 uppercase tracking-[0.2em] font-bold text-sm md:text-base overflow-hidden cursor-pointer"
               >
                 {/* Glitch overlay on hover */}
                 <div className="absolute inset-0 w-full h-full bg-red-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out -z-10"></div>
                 
                 <span className="relative z-10 flex items-center gap-2">
                   <Skull size={18} className="group-hover:animate-[shake_0.5s_infinite]" />
-                  I Accept The Risk
+                  {lang === 'en' ? 'I Accept The Risk' : 'Main Risk Qabool Karta Hoon'}
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
@@ -139,7 +152,7 @@ const RiskSplash: React.FC<RiskSplashProps> = ({ onEnter }) => {
                 transition={{ delay: 4.5 }}
                 className="text-[10px] text-gray-700 mt-4 uppercase tracking-widest"
               >
-                Enter at your own peril
+                {lang === 'en' ? 'Enter at your own peril' : 'Apni zimmedari par dakhil hon'}
               </motion.p>
             </motion.div>
 

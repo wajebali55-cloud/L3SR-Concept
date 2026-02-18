@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface AccessGateProps {
   onUnlock: (token: string) => void;
+  lang?: 'en' | 'ur';
 }
 
 // SECURITY CONFIGURATION
@@ -15,7 +16,7 @@ const VALID_TOKENS = [
   "R09MRC1NRU1CRVJMM1NSX1NFQ1VSRV9WMQ=="  // GOLD-MEMBER
 ];
 
-const AccessGate: React.FC<AccessGateProps> = ({ onUnlock }) => {
+const AccessGate: React.FC<AccessGateProps> = ({ onUnlock, lang = 'en' }) => {
   const [key, setKey] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,7 +69,7 @@ const AccessGate: React.FC<AccessGateProps> = ({ onUnlock }) => {
          
          {/* Premium Badge */}
          <div className="absolute -top-5 bg-gradient-to-r from-trading-gold to-yellow-600 text-black font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(207,181,59,0.4)] flex items-center gap-2">
-            <Star size={12} fill="black" /> Secure Access
+            <Star size={12} fill="black" /> {lang === 'en' ? 'Secure Access' : 'Secure Access'}
          </div>
 
          {/* Icon */}
@@ -83,13 +84,19 @@ const AccessGate: React.FC<AccessGateProps> = ({ onUnlock }) => {
          {/* Header */}
          <div className="text-center space-y-2">
            <h1 className="text-3xl font-bold tracking-tight text-white">L3SR <span className="text-trading-gold">Premium</span></h1>
-           <p className="text-gray-500 text-sm">Institutional Environment. Unauthorized access is prohibited.</p>
+           <p className="text-gray-500 text-sm">
+             {lang === 'en' 
+               ? "Institutional Environment. Unauthorized access is prohibited." 
+               : "Institutional Environment. Ghair mujaz rasai mana hai."}
+           </p>
          </div>
 
          {/* Form */}
          <form onSubmit={handleUnlock} className="w-full space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Access Key</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                {lang === 'en' ? 'Access Key' : 'Access Key'}
+              </label>
               <motion.div 
                 animate={error ? { x: [-5, 5, -5, 5, 0] } : {}}
                 transition={{ duration: 0.4 }}
@@ -118,7 +125,7 @@ const AccessGate: React.FC<AccessGateProps> = ({ onUnlock }) => {
                     exit={{ opacity: 0, height: 0 }}
                     className="text-red-500 text-xs mt-1 ml-1 flex items-center gap-1"
                   >
-                     Authentication Failed. Invalid Key.
+                     {lang === 'en' ? 'Authentication Failed. Invalid Key.' : 'Ghalat Key. Rasai mana hai.'}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -138,7 +145,10 @@ const AccessGate: React.FC<AccessGateProps> = ({ onUnlock }) => {
                   className="w-4 h-4 border-2 border-black border-t-transparent rounded-full"
                 />
               ) : (
-                <>Unlock Portal <ArrowRight size={16} /></>
+                <>
+                  {lang === 'en' ? 'Unlock Portal' : 'Portal Kholein'} 
+                  <ArrowRight size={16} />
+                </>
               )}
             </motion.button>
          </form>

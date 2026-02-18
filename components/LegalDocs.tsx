@@ -7,22 +7,25 @@ type LegalPageType = 'DISCLAIMER' | 'PRIVACY' | 'TERMS' | 'IP';
 interface LegalDocsProps {
   type: LegalPageType;
   onBack: () => void;
+  lang?: 'en' | 'ur';
 }
 
-const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
+const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack, lang = 'en' }) => {
 
   const contentMap = {
     DISCLAIMER: {
-      title: "Risk Disclaimer",
+      title: lang === 'en' ? "Risk Disclaimer" : "Risk Disclaimer",
       icon: ShieldAlert,
       content: (
         <div className="space-y-8">
           <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-xl flex items-start gap-4">
             <AlertTriangle className="text-red-500 shrink-0 mt-1" size={32} />
             <div>
-              <h3 className="text-red-400 font-bold text-xl mb-2">High Risk Warning</h3>
+              <h3 className="text-red-400 font-bold text-xl mb-2">{lang === 'en' ? 'High Risk Warning' : 'High Risk Ki Chetawani'}</h3>
               <p className="text-gray-300 text-sm leading-relaxed">
-                Trading financial markets (Forex, Crypto, Stocks, Binary Options) involves a significant level of risk and is not suitable for all investors. You could lose some or all of your initial investment. Do not trade with money you cannot afford to lose.
+                {lang === 'en' 
+                  ? "Trading financial markets (Forex, Crypto, Stocks, Binary Options) involves a significant level of risk and is not suitable for all investors. You could lose some or all of your initial investment. Do not trade with money you cannot afford to lose."
+                  : "Financial markets (Forex, Crypto, Stocks, Binary Options) mein trade karna bohot risky hai aur sab ke liye munasib nahi hai. Ap apna sara paisa kho sakte hain. Wo paisa na lagayein jo ap khone ki istitaat nahi rakhte."}
               </p>
             </div>
           </div>
@@ -31,23 +34,27 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
             <section>
               <h4 className="text-white font-bold text-lg flex items-center gap-2 mb-2">
                 <Scale size={20} className="text-trading-gold" />
-                Educational Purpose Only
+                {lang === 'en' ? 'Educational Purpose Only' : 'Sirf Taleemi Maqsad Ke Liye'}
               </h4>
               <p className="leading-relaxed">
-                The content provided on <strong>L3SR Trading Masterclass</strong> (including the Strategy Guide, Simulator, and Accuracy Protocol) is strictly for <strong>educational and informational purposes only</strong>.
+                {lang === 'en' 
+                  ? "The content provided on L3SR Trading Masterclass (including the Strategy Guide, Simulator, and Accuracy Protocol) is strictly for educational and informational purposes only."
+                  : "L3SR Trading Masterclass par diya gaya mawad (Strategy Guide, Simulator, aur Accuracy Protocol samait) sirf taleemi aur maloomati maqasid ke liye hai."}
               </p>
               <ul className="list-disc pl-5 space-y-2 mt-4 marker:text-trading-gold">
-                <li>We are <strong>not</strong> financial advisors.</li>
-                <li>We do <strong>not</strong> provide financial advice, investment recommendations, or trading signals.</li>
-                <li>The "L3SR" strategy is a theoretical concept for market analysis.</li>
-                <li>Any success in the simulator does <strong>not</strong> guarantee success in real-market conditions.</li>
+                <li>{lang === 'en' ? "We are not financial advisors." : "Hum financial advisors nahi hain."}</li>
+                <li>{lang === 'en' ? "We do not provide financial advice, investment recommendations, or trading signals." : "Hum koi maliyati mashwara, investment ki sifarish, ya trading signals nahi dete."}</li>
+                <li>{lang === 'en' ? "The 'L3SR' strategy is a theoretical concept for market analysis." : "'L3SR' strategy market analysis ke liye aik nazriyati concept hai."}</li>
+                <li>{lang === 'en' ? "Any success in the simulator does not guarantee success in real-market conditions." : "Simulator mein kamyabi haqeeqi market mein kamyabi ki zamanat nahi hai."}</li>
               </ul>
             </section>
 
             <section>
-              <h4 className="text-white font-bold text-lg mb-2">No Liability</h4>
+              <h4 className="text-white font-bold text-lg mb-2">{lang === 'en' ? 'No Liability' : 'Koi Zimmedari Nahi'}</h4>
               <p className="leading-relaxed">
-                L3SR Premium and its creators accept no liability for any loss or damage, including without limitation to, any loss of profit, which may arise directly or indirectly from use of or reliance on such information. You are solely responsible for your own trading decisions.
+                {lang === 'en' 
+                 ? "L3SR Premium and its creators accept no liability for any loss or damage, including without limitation to, any loss of profit, which may arise directly or indirectly from use of or reliance on such information. You are solely responsible for your own trading decisions."
+                 : "L3SR Premium aur iske creators kisi bhi nuqsan ya damage ke zimmedar nahi hain, Bashamool munafay ka nuqsan, jo is maloomat par inhisaar karne se ho. Ap apne trading faislon ke khud zimmedar hain."}
               </p>
             </section>
           </div>
@@ -64,35 +71,20 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
              <div>
                 <h3 className="text-blue-400 font-bold text-xl mb-2">Data Privacy & Local Storage</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">
-                  We respect your privacy by design. Unlike other platforms, <strong>we do not store your trading journal data on our servers.</strong> Your data stays on your device.
+                  {lang === 'en'
+                    ? "We respect your privacy by design. Unlike other platforms, we do not store your trading journal data on our servers. Your data stays on your device."
+                    : "Hum apki privacy ka khayal rakhte hain. Dusre platforms ke baraks, hum apka trading journal data apne servers par store nahi karte. Apka data apki device par rehta hai."}
                 </p>
              </div>
           </div>
 
           <div className="space-y-6 text-gray-400">
             <section>
-              <h4 className="text-white font-bold text-lg mb-2">1. How We Store Data</h4>
+              <h4 className="text-white font-bold text-lg mb-2">{lang === 'en' ? '1. How We Store Data' : '1. Hum Data Kaise Store Karte Hain'}</h4>
               <p className="mb-2">
-                This website uses <strong>Local Storage</strong> technology. This means your Trading Journal, settings, and Simulator scores are saved directly on your own device (browser).
-              </p>
-              <ul className="list-disc pl-5 space-y-2 text-sm marker:text-trading-gold">
-                <li>We have no access to your journal entries.</li>
-                <li>If you clear your browser cache/cookies, your journal data may be deleted.</li>
-                <li>We do not sell your data to third parties because we do not possess it.</li>
-              </ul>
-            </section>
-
-            <section>
-              <h4 className="text-white font-bold text-lg mb-2">2. Cookies</h4>
-              <p>
-                We use strictly essential cookies/local storage solely for website functionality (e.g., remembering your login session token or keeping you logged in). We do not use invasive third-party tracking pixels to follow you around the internet.
-              </p>
-            </section>
-
-            <section>
-              <h4 className="text-white font-bold text-lg mb-2">3. Third Party Links</h4>
-              <p>
-                If we link to external charting platforms (like TradingView) or brokers, please review their separate privacy policies. We are not responsible for their data practices.
+                {lang === 'en'
+                 ? "This website uses Local Storage technology. This means your Trading Journal, settings, and Simulator scores are saved directly on your own device (browser)."
+                 : "Ye website Local Storage technology use karti hai. Iska matlab hai apka Trading Journal, settings, aur Simulator scores seedha apki device (browser) par save hote hain."}
               </p>
             </section>
           </div>
@@ -106,35 +98,19 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
         <div className="space-y-8 text-gray-400">
            <section className="bg-trading-card border border-gray-800 p-6 rounded-xl">
              <p className="text-white font-medium">
-                By accessing L3SR Trading Masterclass, you agree to be bound by these Terms and Conditions and our Disclaimer. If you do not agree, please discontinue use immediately.
+                {lang === 'en' 
+                 ? "By accessing L3SR Trading Masterclass, you agree to be bound by these Terms and Conditions and our Disclaimer. If you do not agree, please discontinue use immediately."
+                 : "L3SR Trading Masterclass use karke, ap in Terms and Conditions aur Disclaimer ke paband hain. Agar ap ittefaq nahi karte, to foran use karna chor dein."}
              </p>
            </section>
 
            <section>
-            <h4 className="text-white font-bold text-lg mb-2">1. User Responsibility</h4>
+            <h4 className="text-white font-bold text-lg mb-2">{lang === 'en' ? '1. User Responsibility' : '1. User Ki Zimmedari'}</h4>
             <p className="leading-relaxed text-sm">
-              You acknowledge that trading involves risk. You agree that L3SR is a tool for learning analysis, not a tool for guaranteed profit. You agree not to hold the platform liable for any financial outcomes resulting from your interpretation of the material.
+              {lang === 'en'
+               ? "You acknowledge that trading involves risk. You agree that L3SR is a tool for learning analysis, not a tool for guaranteed profit."
+               : "Ap mante hain ke trading mein risk hai. Ap agree karte hain ke L3SR analysis seekhne ka tool hai, guaranteed munafay ka tool nahi."}
             </p>
-          </section>
-
-          <section>
-            <h4 className="text-white font-bold text-lg mb-2">2. Prohibited Use</h4>
-            <p className="leading-relaxed text-sm mb-2">
-              You agree not to:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-sm marker:text-red-500">
-               <li>Reverse engineer the simulator logic or code.</li>
-               <li>Share your access token or login credentials with unauthorized users.</li>
-               <li>Use the platform for any illegal financial activities.</li>
-               <li>Attempt to bypass the security access gate.</li>
-            </ul>
-          </section>
-
-          <section>
-             <h4 className="text-white font-bold text-lg mb-2">3. Amendments</h4>
-             <p className="text-sm">
-                We reserve the right to update these terms at any time. Continued use of the platform constitutes acceptance of the new terms.
-             </p>
           </section>
         </div>
       )
@@ -156,28 +132,15 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
 
           <div className="space-y-6 text-gray-400">
             <p>
-              All content hosted on this domain is the exclusive property of L3SR Premium. This includes, but is not limited to:
+              {lang === 'en' ? 'All content hosted on this domain is the exclusive property of L3SR Premium.' : 'Is domain par موجود tamam mawad L3SR Premium ki malkiyat hai.'}
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {[
-                 "The 'L3SR' Strategy Methodology", 
-                 "Simulator Scenarios & Logic", 
-                 "Source Code & Visual Design", 
-                 "Accuracy Guides & Educational Text"
-               ].map((item, i) => (
-                 <div key={i} className="bg-trading-card p-4 rounded-lg border border-gray-800 flex items-center gap-3">
-                    <FileCheck size={18} className="text-trading-gold shrink-0" />
-                    <span className="text-sm text-gray-300">{item}</span>
-                 </div>
-               ))}
-            </div>
-
+            
             <section className="mt-6 pt-6 border-t border-gray-800">
               <h4 className="text-white font-bold text-lg mb-2">Copyright Notice</h4>
               <p className="text-sm leading-relaxed">
                 © {new Date().getFullYear()} L3SR Trading Masterclass. All rights reserved.
                 <br/><br/>
-                Unauthorized reproduction, redistribution, resale, or modification of this material is strictly prohibited. Violators will be subject to account termination and potential legal action.
+                {lang === 'en' ? 'Unauthorized reproduction, redistribution, resale, or modification of this material is strictly prohibited.' : 'Is mawad ki ijazat ke baghair naqal, taqseem, farokht, ya tabdeeli sakhti se mana hai.'}
               </p>
             </section>
           </div>
@@ -201,7 +164,7 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
              className="flex items-center gap-2 text-gray-500 hover:text-trading-gold transition-colors mb-8 group"
           >
              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-             Back to Dashboard
+             {lang === 'en' ? 'Back to Dashboard' : 'Dashboard par wapis'}
           </motion.button>
 
           {/* Page Header */}
@@ -238,7 +201,7 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
              </div>
           </motion.div>
 
-          {/* HELP SECTION (NEW) */}
+          {/* HELP SECTION */}
           <motion.div 
              initial={{ opacity: 0 }}
              animate={{ opacity: 1 }}
@@ -246,7 +209,7 @@ const LegalDocs: React.FC<LegalDocsProps> = ({ type, onBack }) => {
              className="mt-8 flex flex-col items-center justify-center text-center gap-3"
           >
              <div className="text-sm font-bold text-gray-500 flex items-center gap-2">
-                 <HelpCircle size={16} /> Have questions about these terms?
+                 <HelpCircle size={16} /> {lang === 'en' ? 'Have questions about these terms?' : 'Kya in terms ke baray mein sawal hain?'}
              </div>
              <div className="flex gap-4">
                  <a href="https://wa.me/447473938781" target="_blank" rel="noreferrer" className="text-xs text-[#25D366] hover:underline flex items-center gap-1">

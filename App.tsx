@@ -11,8 +11,8 @@ import LegalDocs from './components/LegalDocs';
 import CookieConsent from './components/CookieConsent';
 import RiskSplash from './components/RiskSplash';
 import QuotesGallery from './components/QuotesGallery';
-import ContactPage from './components/ContactPage'; // NEW IMPORT
-import { BookOpen, Gamepad2, TrendingUp, Menu, X, Github, Crown, LogOut, Globe, AlertOctagon, Signal, BarChart2, Headphones, Eye, PlayCircle, Target, Scale, Feather, MessageCircle, Cpu } from 'lucide-react';
+import ContactPage from './components/ContactPage';
+import { BookOpen, Gamepad2, Menu, X, Crown, LogOut, Globe, Signal, BarChart2, Headphones, Eye, PlayCircle, Scale, Cpu, Languages } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -22,86 +22,74 @@ const App: React.FC = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isWidgetMode, setIsWidgetMode] = useState(false);
   
-  // New State: Controls the initial Horror/Risk Splash Screen
+  // Language State: 'en' = English, 'ur' = Roman Urdu
+  const [lang, setLang] = useState<'en' | 'ur'>('en');
+  
   const [showRiskSplash, setShowRiskSplash] = useState(true);
 
   // Security: Check for valid session token on load
   useEffect(() => {
-    // 1. Check LocalStorage (Persistent)
     let token = localStorage.getItem('__l3sr_secure_session_v1');
-    
-    // 2. If not found, Check SessionStorage (Temporary per tab)
     if (!token) {
       token = sessionStorage.getItem('__l3sr_secure_session_v1');
     }
-    
-    // Validate the token format
     if (token && token.length > 5 && /^[0-9a-f]+$/i.test(token)) {
       setIsAuthenticated(true);
     }
     setIsCheckingAuth(false);
 
-    // Extra runtime protection
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', handleContextMenu);
-    
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
 
-  // Window Resize Listener for Widget Mode
+  // Window Resize Listener
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       const isSmallBox = w < 550 && h < 650;
       const isStrip = h < 500;
-
       if (isSmallBox || isStrip) {
         setIsWidgetMode(true);
       } else {
         setIsWidgetMode(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     handleResize(); 
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleLogin = (token: string) => {
-    // Check if user has consented to cookies/storage
     const hasConsent = localStorage.getItem('l3sr_cookie_consent') === 'true';
-
     if (hasConsent) {
-      // If consented, save to LocalStorage (Persists across browser restarts)
       localStorage.setItem('__l3sr_secure_session_v1', token);
     } else {
-      // If NOT consented, save to SessionStorage (Lost when tab/browser closes)
       sessionStorage.setItem('__l3sr_secure_session_v1', token);
     }
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
-    // Clear from both locations to be safe
     localStorage.removeItem('__l3sr_secure_session_v1');
     sessionStorage.removeItem('__l3sr_secure_session_v1');
     setIsAuthenticated(false);
     setPage(PageState.HOME);
-    setShowRiskSplash(true); // Reset splash on logout
+    setShowRiskSplash(true);
   };
 
-  // Called when user clicks "Accept All" on the banner
   const handleCookieAccept = () => {
-    // If the user is currently logged in via SessionStorage, move it to LocalStorage for persistence
     const sessionToken = sessionStorage.getItem('__l3sr_secure_session_v1');
     if (sessionToken) {
       localStorage.setItem('__l3sr_secure_session_v1', sessionToken);
-      // We keep it in session too just in case, or we can remove it. Keeping it is fine.
     }
+  };
+
+  const toggleLanguage = () => {
+    setLang(prev => prev === 'en' ? 'ur' : 'en');
   };
 
   const navigate = (p: PageState) => {
@@ -112,30 +100,22 @@ const App: React.FC = () => {
 
   if (isCheckingAuth) return null;
 
-  // --- VIEW LOGIC ---
-
-  // 1. Show Risk Splash Screen First
   if (showRiskSplash) {
-    return <RiskSplash onEnter={() => setShowRiskSplash(false)} />;
+    return <RiskSplash onEnter={() => setShowRiskSplash(false)} lang={lang} />;
   }
 
-  // 2. Then Show Access Gate (Login)
   if (!isAuthenticated) {
-    return <AccessGate onUnlock={handleLogin} />;
+    return <AccessGate onUnlock={handleLogin} lang={lang} />;
   }
 
-  // 3. Widget Mode Check
   if (isWidgetMode) {
     return <L3SRTimer mode="widget" onToggleMode={() => setIsWidgetMode(false)} />;
   }
 
-  // 4. Main App Render
-  // --- DUMMY DATA FOR WIDGETS ---
   const currentHour = new Date().getHours();
   const session = currentHour >= 8 && currentHour < 16 ? 'LONDON' : currentHour >= 13 && currentHour < 21 ? 'NEW YORK' : 'ASIAN';
   const volatility = session === 'ASIAN' ? 'LOW' : 'HIGH';
 
-  // Animation Variants
   const pageVariants = {
     initial: { opacity: 0, y: 10, scale: 0.98 },
     animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
@@ -174,12 +154,12 @@ const App: React.FC = () => {
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-6">
               {[
-                { label: 'Dashboard', value: PageState.HOME, icon: null },
-                { label: 'Strategy Guide', value: PageState.GUIDE, icon: null },
-                { label: 'Accuracy', value: PageState.ACCURACY, icon: null },
-                { label: 'Simulator', value: PageState.SIMULATOR, icon: null },
-                { label: 'Wisdom', value: PageState.QUOTES, icon: null },
-                { label: 'Contact', value: PageState.CONTACT, icon: null }, // NEW ITEM
+                { label: 'Dashboard', value: PageState.HOME },
+                { label: 'Strategy Guide', value: PageState.GUIDE },
+                { label: 'Accuracy', value: PageState.ACCURACY },
+                { label: 'Simulator', value: PageState.SIMULATOR },
+                { label: 'Wisdom', value: PageState.QUOTES },
+                { label: 'Contact', value: PageState.CONTACT },
               ].map((item) => (
                 <motion.button 
                   key={item.label}
@@ -210,6 +190,16 @@ const App: React.FC = () => {
                 <BarChart2 size={16} />
                 Journal
               </motion.button>
+              
+              {/* Language Toggle */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={toggleLanguage}
+                className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-800 text-white text-xs font-bold border border-gray-700"
+              >
+                 <Languages size={14} /> {lang === 'en' ? 'EN' : 'UR'}
+              </motion.button>
 
               <div className="h-6 w-px bg-gray-800"></div>
 
@@ -224,7 +214,15 @@ const App: React.FC = () => {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={toggleLanguage}
+                className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-800 text-white text-xs font-bold border border-gray-700"
+              >
+                 {lang === 'en' ? 'EN' : 'UR'}
+              </motion.button>
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-gray-400 hover:text-white p-2">
                 {mobileMenuOpen ? <X /> : <Menu />}
               </button>
@@ -279,7 +277,7 @@ const App: React.FC = () => {
                 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   
-                  {/* LEFT COLUMN: Welcome & Actions (7 Cols) */}
+                  {/* LEFT COLUMN: Welcome & Actions */}
                   <div className="lg:col-span-7 space-y-8">
                      <div className="text-left">
                         <motion.div 
@@ -289,7 +287,7 @@ const App: React.FC = () => {
                           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-trading-gold/10 border border-trading-gold/20 text-trading-gold text-xs font-bold uppercase tracking-widest mb-6"
                         >
                           <span className="w-2 h-2 rounded-full bg-trading-gold animate-pulse"></span>
-                          Authorized Access
+                          {lang === 'en' ? 'Authorized Access' : 'Authorized Access Active'}
                         </motion.div>
 
                         <motion.h1 
@@ -306,7 +304,9 @@ const App: React.FC = () => {
                           transition={{ delay: 0.3 }}
                           className="max-w-xl text-lg text-gray-400 leading-relaxed"
                         >
-                          Eliminate broker lag with the Atomic Timer. Validate every trade using the pre-flight checklist below.
+                          {lang === 'en' 
+                            ? "Eliminate broker lag with the Atomic Timer. Validate every trade using the pre-flight checklist below."
+                            : "Atomic Timer ke sath broker ka lag khatam karein. Har trade ko nechy diye gaye checklist se validate karein."}
                         </motion.p>
                         
                         <div className="mt-8 flex flex-col sm:flex-row gap-4">
@@ -317,7 +317,7 @@ const App: React.FC = () => {
                             className="px-6 py-4 bg-trading-gold text-black font-bold rounded-xl hover:bg-[#bba02a] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(207,181,59,0.3)]"
                           >
                             <BookOpen size={20} />
-                            Master The Strategy
+                            {lang === 'en' ? 'Master The Strategy' : 'Strategy Seekhein'}
                           </motion.button>
                           <motion.button 
                             whileHover={{ scale: 1.05 }}
@@ -326,7 +326,7 @@ const App: React.FC = () => {
                             className="px-6 py-4 bg-[#1a1a1a] text-white font-bold rounded-xl hover:bg-[#252525] border border-gray-800 transition-all flex items-center justify-center gap-2"
                           >
                             <Gamepad2 size={20} />
-                            Practice Simulator
+                            {lang === 'en' ? 'Practice Simulator' : 'Practice Simulator'}
                           </motion.button>
                         </div>
                      </div>
@@ -335,13 +335,13 @@ const App: React.FC = () => {
                      <div className="grid grid-cols-2 gap-4">
                         <motion.div whileHover={{ y: -5 }} className="bg-trading-card p-4 rounded-xl border border-gray-800 flex flex-col gap-2">
                            <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                             <Globe size={14} /> Active Session
+                             <Globe size={14} /> {lang === 'en' ? 'Active Session' : 'Active Session'}
                            </div>
                            <div className="text-xl text-white font-bold">{session}</div>
                         </motion.div>
                         <motion.div whileHover={{ y: -5 }} className="bg-trading-card p-4 rounded-xl border border-gray-800 flex flex-col gap-2">
                            <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                             <Signal size={14} /> Market Volatility
+                             <Signal size={14} /> {lang === 'en' ? 'Market Volatility' : 'Market Volatility'}
                            </div>
                            <div className={`text-xl font-bold ${volatility === 'HIGH' ? 'text-green-500' : 'text-orange-500'}`}>
                              {volatility}
@@ -349,19 +349,17 @@ const App: React.FC = () => {
                         </motion.div>
                      </div>
                      
-                     {/* NEW: Pre-Flight Checklist Widget */}
-                     <PreFlightChecklist />
+                     <PreFlightChecklist lang={lang} />
                      
                   </div>
 
-                  {/* RIGHT COLUMN: The Timer (5 Cols) */}
+                  {/* RIGHT COLUMN: The Timer */}
                   <div className="lg:col-span-5">
                      <div className="sticky top-24 space-y-6">
                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }}>
                          <L3SRTimer onToggleMode={() => setIsWidgetMode(true)} />
                        </motion.div>
                        
-                       {/* NEW: Updated How to Use Instructions */}
                        <motion.div 
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -369,16 +367,16 @@ const App: React.FC = () => {
                           className="bg-trading-card p-5 rounded-xl border border-gray-800"
                        >
                           <h4 className="text-xs text-trading-gold font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-                             <Headphones size={14} /> Timer Workflow (Why & How)
+                             <Headphones size={14} /> {lang === 'en' ? 'Timer Workflow' : 'Timer Kaise Use Karein'}
                           </h4>
                           
                           <div className="space-y-4">
                              <div className="flex items-start gap-3">
                                 <div className="bg-gray-800 p-1.5 rounded text-trading-gold"><PlayCircle size={16} /></div>
                                 <div>
-                                   <strong className="text-white text-sm block">1. Start It Once</strong>
+                                   <strong className="text-white text-sm block">{lang === 'en' ? '1. Start It Once' : '1. Aik Baar Start Karein'}</strong>
                                    <p className="text-xs text-gray-400">
-                                      Click "Activate" when you sit down to trade. Let it run continuously. It syncs with the broker clock.
+                                      {lang === 'en' ? 'Click Activate when you sit down. Let it run.' : 'Jab trading shuru karein to Activate dabayein. Isey chalne dein.'}
                                    </p>
                                 </div>
                              </div>
@@ -386,9 +384,9 @@ const App: React.FC = () => {
                              <div className="flex items-start gap-3">
                                 <div className="bg-gray-800 p-1.5 rounded text-blue-400"><Eye size={16} /></div>
                                 <div>
-                                   <strong className="text-white text-sm block">2. Eyes on the Candle</strong>
+                                   <strong className="text-white text-sm block">{lang === 'en' ? '2. Eyes on the Candle' : '2. Candle Par Nazar Rakhein'}</strong>
                                    <p className="text-xs text-gray-400">
-                                      Don't watch the clock. Watch the price action. The audio tells you when to focus.
+                                      {lang === 'en' ? "Don't watch the clock. Watch the price action." : "Ghadi ko mat dekhein. Sirf price action par focus karein."}
                                    </p>
                                 </div>
                              </div>
@@ -396,11 +394,11 @@ const App: React.FC = () => {
                              <div className="flex items-start gap-3">
                                 <div className="bg-gray-800 p-1.5 rounded text-green-400"><Signal size={16} /></div>
                                 <div>
-                                   <strong className="text-white text-sm block">3. The Sequence</strong>
+                                   <strong className="text-white text-sm block">{lang === 'en' ? '3. The Sequence' : '3. Sequence'}</strong>
                                    <ul className="text-xs text-gray-400 mt-1 space-y-1">
-                                      <li><span className="text-white font-mono">:56s</span> - Beep! (Stop looking at charts, Focus on ONE candle)</li>
-                                      <li><span className="text-white font-mono">:57-59s</span> - Did it jump? (Rejection check)</li>
-                                      <li><span className="text-white font-mono">:00s</span> - Beep! (Execute Trade)</li>
+                                      <li><span className="text-white font-mono">:56s</span> - Beep! ({lang === 'en' ? 'Focus on ONE candle' : 'Sirf candle par focus karein'})</li>
+                                      <li><span className="text-white font-mono">:57-59s</span> - {lang === 'en' ? 'Did it jump?' : 'Kya jump aya?'}</li>
+                                      <li><span className="text-white font-mono">:00s</span> - Beep! ({lang === 'en' ? 'Execute Trade' : 'Trade Lagayein'})</li>
                                    </ul>
                                 </div>
                              </div>
@@ -424,7 +422,7 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
             >
-               <ConceptGuide />
+               <ConceptGuide lang={lang} />
             </motion.div>
           )}
 
@@ -437,7 +435,7 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-               <AccuracyGuide />
+               <AccuracyGuide lang={lang} />
             </motion.div>
           )}
 
@@ -450,11 +448,10 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center"
             >
-              <ScenarioSimulator />
+              <ScenarioSimulator lang={lang} />
             </motion.div>
           )}
           
-          {/* QUOTES PAGE RENDER */}
           {page === PageState.QUOTES && (
             <motion.div 
               key="quotes"
@@ -464,11 +461,10 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-               <QuotesGallery />
+               <QuotesGallery lang={lang} />
             </motion.div>
           )}
 
-          {/* CONTACT PAGE RENDER */}
           {page === PageState.CONTACT && (
             <motion.div 
               key="contact"
@@ -478,7 +474,7 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-               <ContactPage />
+               <ContactPage lang={lang} />
             </motion.div>
           )}
 
@@ -491,29 +487,29 @@ const App: React.FC = () => {
               exit="exit"
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-              <TradeJournal />
+              <TradeJournal lang={lang} />
             </motion.div>
           )}
 
-          {/* LEGAL PAGES - Now Individual */}
+          {/* LEGAL PAGES */}
           {page === PageState.DISCLAIMER && (
              <motion.div key="disclaimer" variants={pageVariants} initial="initial" animate="animate" exit="exit">
-               <LegalDocs type="DISCLAIMER" onBack={() => navigate(PageState.HOME)} />
+               <LegalDocs type="DISCLAIMER" onBack={() => navigate(PageState.HOME)} lang={lang} />
              </motion.div>
           )}
           {page === PageState.PRIVACY && (
              <motion.div key="privacy" variants={pageVariants} initial="initial" animate="animate" exit="exit">
-               <LegalDocs type="PRIVACY" onBack={() => navigate(PageState.HOME)} />
+               <LegalDocs type="PRIVACY" onBack={() => navigate(PageState.HOME)} lang={lang} />
              </motion.div>
           )}
           {page === PageState.TERMS && (
              <motion.div key="terms" variants={pageVariants} initial="initial" animate="animate" exit="exit">
-               <LegalDocs type="TERMS" onBack={() => navigate(PageState.HOME)} />
+               <LegalDocs type="TERMS" onBack={() => navigate(PageState.HOME)} lang={lang} />
              </motion.div>
           )}
           {page === PageState.IP && (
              <motion.div key="ip" variants={pageVariants} initial="initial" animate="animate" exit="exit">
-               <LegalDocs type="IP" onBack={() => navigate(PageState.HOME)} />
+               <LegalDocs type="IP" onBack={() => navigate(PageState.HOME)} lang={lang} />
              </motion.div>
           )}
 
@@ -540,7 +536,6 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          {/* New Legal Links - Linked to specific states */}
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
              <button onClick={() => navigate(PageState.DISCLAIMER)} className="text-gray-500 hover:text-white text-xs transition-colors flex items-center gap-1">
                 <Scale size={12} /> Legal Disclaimer
